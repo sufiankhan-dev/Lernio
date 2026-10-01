@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { Icon, type IconName } from "./Icon";
 
@@ -8,6 +9,7 @@ type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> & {
   variant?: ButtonVariant;
   size?: ButtonSize;
   icon?: IconName;
+  iconSize?: number;
   children?: ReactNode;
 };
 
@@ -24,7 +26,7 @@ const variants: Record<ButtonVariant, string> = {
   primary:
     "bg-primary-500 text-white shadow-sm hover:bg-primary-600 disabled:bg-primary-100 disabled:text-primary-300",
   secondary:
-    "bg-transparent text-primary-500 border border-primary-500 hover:bg-primary-50 " +
+    "bg-transparent text-primary-500 border border-primary-500 hover:bg-primary-100 " +
     "disabled:border-primary-200 disabled:text-primary-300",
   tertiary:
     "bg-white text-neutral-900 border border-neutral-200 shadow-sm hover:border-neutral-300 hover:bg-neutral-50 " +
@@ -36,6 +38,7 @@ export function Button({
   variant = "primary",
   size = "md",
   icon,
+  iconSize = 16,
   children,
   className = "",
   type = "button",
@@ -48,7 +51,7 @@ export function Button({
       {...rest}
     >
       <span className="min-w-0 truncate">{children}</span>
-      {icon ? <Icon name={icon} size={16} className="shrink-0" /> : null}
+      {icon ? <Icon name={icon} size={iconSize} className="shrink-0" /> : null}
     </button>
   );
 }
@@ -57,6 +60,7 @@ type LinkButtonProps = {
   variant?: ButtonVariant;
   size?: ButtonSize;
   icon?: IconName;
+  iconSize?: number;
   children?: ReactNode;
   className?: string;
   href?: string;
@@ -66,14 +70,15 @@ export function LinkButton({
   variant = "primary",
   size = "md",
   icon,
+  iconSize = 16,
   children,
   className = "",
-  href = "#",
+  href = "/",
 }: LinkButtonProps) {
   return (
-    <a href={href} className={`${base} ${sizes[size]} ${variants[variant]} ${className}`}>
+    <Link href={href} className={`${base} ${sizes[size]} ${variants[variant]} ${className}`}>
       <span className="min-w-0 truncate">{children}</span>
-      {icon ? <Icon name={icon} size={16} className="shrink-0" /> : null}
-    </a>
+      {icon ? <Icon name={icon} size={iconSize} className="shrink-0" /> : null}
+    </Link>
   );
 }
