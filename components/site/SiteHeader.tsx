@@ -1,7 +1,7 @@
 import { Icon } from "@/components/ui/Icon";
 import { SiteNav } from "@/components/ui/Nav";
 import { navLinks } from "@/lib/home-content";
-import { Avatar } from "./Avatar";
+import { AuthControls } from "./AuthControls";
 
 export function SiteHeader() {
   return (
@@ -19,13 +19,7 @@ export function SiteHeader() {
                 >
                   <Icon name="bell" size={24} />
                 </button>
-                <button
-                  type="button"
-                  aria-label="Account"
-                  className="flex items-center justify-center rounded-full"
-                >
-                  <Avatar />
-                </button>
+                <AuthControls />
               </>
             }
           />
