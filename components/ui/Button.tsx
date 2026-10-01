@@ -12,12 +12,12 @@ type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> & {
 };
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-md font-medium whitespace-nowrap transition-colors " +
-  "disabled:cursor-not-allowed disabled:pointer-events-none";
+  "inline-flex h-11 max-w-full min-w-0 items-center justify-center gap-2 rounded-md font-medium " +
+  "transition-colors disabled:cursor-not-allowed disabled:pointer-events-none";
 
 const sizes: Record<ButtonSize, string> = {
-  sm: "h-11 px-3 text-body",
-  md: "h-11 px-4 text-body",
+  sm: "px-3 text-body",
+  md: "px-4 text-body",
 };
 
 const variants: Record<ButtonVariant, string> = {
@@ -47,8 +47,8 @@ export function Button({
       className={`${base} ${sizes[size]} ${variants[variant]} ${className}`}
       {...rest}
     >
-      {children}
-      {icon ? <Icon name={icon} size={16} /> : null}
+      <span className="min-w-0 truncate">{children}</span>
+      {icon ? <Icon name={icon} size={16} className="shrink-0" /> : null}
     </button>
   );
 }
@@ -72,8 +72,8 @@ export function LinkButton({
 }: LinkButtonProps) {
   return (
     <a href={href} className={`${base} ${sizes[size]} ${variants[variant]} ${className}`}>
-      {children}
-      {icon ? <Icon name={icon} size={16} /> : null}
+      <span className="min-w-0 truncate">{children}</span>
+      {icon ? <Icon name={icon} size={16} className="shrink-0" /> : null}
     </a>
   );
 }

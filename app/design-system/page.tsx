@@ -109,19 +109,19 @@ export default function DesignSystemPage() {
           <section className={`${styles.panel} ${styles.hero}`}>
             <div className="flex items-center gap-2">
               <svg viewBox="0 0 24 24" width={34} height={34} aria-hidden="true">
-                <path d="M2 4h20L12 21z" fill="#FB7316" />
-                <path d="M8.6 10.4h6.8L12 16.6z" fill="#fff" />
+                <rect x="2" y="2" width="20" height="20" rx="6" fill="#FB7316" />
+                <path d="M8 6.5h2.6v8.9H16V18H8z" fill="#fff" />
               </svg>
               <span className="font-display text-heading-1 font-bold tracking-tight text-neutral-900">
-                Vertex
+                Lernio
               </span>
             </div>
             <h1 className="font-display text-display-2 font-bold leading-[2.75rem] text-neutral-900">
               Design System
             </h1>
             <p className="text-body leading-5 text-neutral-500">
-              A unified design language for Vertex learning platform. Clean, modern and focused on
-              clarity, consistency and intuitive learning experiences.
+              A unified design language for the Lernio learning platform. Clean, modern and focused
+              on clarity, consistency and intuitive learning experiences.
             </p>
             <p className="ds-section-label mt-2 text-neutral-500">
               Version 1.0 <span className="mx-1 text-primary-500">•</span> May 2025
@@ -283,7 +283,7 @@ export default function DesignSystemPage() {
             ].map((row) => (
               <div key={row.label} className="mb-3">
                 <p className="mb-1.5 text-small text-neutral-500">{row.label}</p>
-                <div className="grid grid-cols-4 items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   {row.state === "disabled" ? (
                     <>
                       <Button disabled>Get Started</Button>

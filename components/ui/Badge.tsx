@@ -19,7 +19,7 @@ type BadgeProps = {
 export function Badge({ variant = "video", icon, children, className = "" }: BadgeProps) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-xs px-2 py-0.5 text-small font-medium uppercase tracking-wide ${variants[variant]} ${className}`}
+      className={`inline-flex w-fit max-w-full items-center gap-1 self-start rounded-xs px-2 py-0.5 text-small font-medium uppercase tracking-wide ${variants[variant]} ${className}`}
     >
       {icon ? <Icon name={icon} size={12} /> : null}
       {children}

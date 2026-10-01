@@ -4,10 +4,12 @@ export function Logo({ className = "" }: { className?: string }) {
   return (
     <span className={`inline-flex items-center gap-2 ${className}`}>
       <svg viewBox="0 0 24 24" width={26} height={26} aria-hidden="true" focusable="false">
-        <path d="M2 4h20L12 21z" fill="#FB7316" />
-        <path d="M8.6 10.4h6.8L12 16.6z" fill="#fff" />
+        <rect x="2" y="2" width="20" height="20" rx="6" fill="#FB7316" />
+        <path d="M8 6.5h2.6v8.9H16V18H8z" fill="#fff" />
       </svg>
-      <span className="font-display text-heading-2 font-bold tracking-tight text-neutral-900">Vertex</span>
+      <span className="font-display text-heading-2 font-bold tracking-tight text-neutral-900">
+        Lernio
+      </span>
     </span>
   );
 }
