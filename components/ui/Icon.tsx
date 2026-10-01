@@ -13,6 +13,8 @@ export type IconName =
   | "chevron-right"
   | "chevron-down"
   | "chevron-left"
+  | "arrow-right"
+  | "star"
   | "check"
   | "check-circle"
   | "lock"
@@ -92,6 +94,15 @@ const outlinePaths: Record<IconName, React.ReactNode> = {
   "chevron-right": <path d="m9 5 7 7-7 7" />,
   "chevron-down": <path d="m5 9 7 7 7-7" />,
   "chevron-left": <path d="m15 5-7 7 7 7" />,
+  "arrow-right": (
+    <>
+      <path d="M4 12h15" />
+      <path d="m13 6 6 6-6 6" />
+    </>
+  ),
+  star: (
+    <path d="m12 3.6 2.6 5.5 6 .8-4.4 4.2 1.1 6L12 17.3 6.7 20.1l1.1-6L3.4 9.9l6-.8z" />
+  ),
   check: <path d="m4 12 5 5L20 6" />,
   "check-circle": (
     <>
@@ -198,6 +209,12 @@ const filledPaths: Record<IconName, React.ReactNode> = {
   "chevron-right": <path d="M9.3 4.3 8 5.7l5.3 5.3L8 16.3l1.3 1.4 6.7-6.7z" />,
   "chevron-down": <path d="M4.3 9.3 5.7 8l5.3 5.3L16.3 8l1.4 1.3-6.7 6.7z" />,
   "chevron-left": <path d="M14.7 4.3 16 5.7l-5.3 5.3 5.3 5.3-1.3 1.4L8 11.3z" />,
+  "arrow-right": (
+    <path d="M12.9 4.3 11.5 5.7l5.1 5.1H3.2v1.8h13.4l-5.1 5.1 1.4 1.4 6.9-6.9z" />
+  ),
+  star: (
+    <path d="m12 2.4 2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5-4.7-4.6 6.5-.9z" />
+  ),
   check: <path d="M20.3 5.7a1 1 0 0 1 0 1.4l-10 10a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.4L9.6 15l9.3-9.3a1 1 0 0 1 1.4 0z" />,
   "check-circle": (
     <>

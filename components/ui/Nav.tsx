@@ -1,45 +1,75 @@
+import Link from "next/link";
+import type { ReactNode } from "react";
 import { Icon } from "./Icon";
 
-export function Logo({ className = "" }: { className?: string }) {
+export function BrandMark({ size = 30, className = "" }: { size?: number; className?: string }) {
   return (
-    <span className={`inline-flex items-center gap-2 ${className}`}>
-      <svg viewBox="0 0 24 24" width={26} height={26} aria-hidden="true" focusable="false">
-        <rect x="2" y="2" width="20" height="20" rx="6" fill="#FB7316" />
-        <path d="M8 6.5h2.6v8.9H16V18H8z" fill="#fff" />
-      </svg>
-      <span className="font-display text-heading-2 font-bold tracking-tight text-neutral-900">
+    <svg
+      viewBox="0 0 32 32"
+      width={size}
+      height={size}
+      className={className}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <defs>
+        <linearGradient id="lernio-brand-mark" x1="7" y1="3" x2="25" y2="30" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#FB923C" />
+          <stop offset="1" stopColor="#F05A05" />
+        </linearGradient>
+      </defs>
+      <path d="M2 4h11.3L16 29.6z" fill="url(#lernio-brand-mark)" />
+      <path d="M18.7 4H30L16 29.6z" fill="url(#lernio-brand-mark)" />
+    </svg>
+  );
+}
+
+export function Logo({ className = "", href }: { className?: string; href?: string }) {
+  return (
+    <Link
+      href={href ?? "/"}
+      className={`inline-flex items-center gap-2 ${className}`}
+      aria-label="Lernio home"
+    >
+      <BrandMark />
+      <span className="font-display text-heading-1 leading-none font-bold tracking-tight text-neutral-900">
         Lernio
       </span>
-    </span>
+    </Link>
   );
 }
 
 type SiteNavProps = {
   links: { label: string; href?: string; active?: boolean }[];
+  actions?: ReactNode;
+  className?: string;
 };
 
-export function SiteNav({ links }: SiteNavProps) {
+export function SiteNav({ links, actions, className = "" }: SiteNavProps) {
   return (
-    <nav aria-label="Main" className="flex items-center gap-6">
-      <Logo />
-      <ul className="flex items-center gap-5">
-        {links.map((link) => (
-          <li key={link.label}>
-            <a
-              href={link.href ?? "#"}
-              aria-current={link.active ? "page" : undefined}
-              className={
-                link.active
-                  ? "text-body font-medium text-primary-500"
-                  : "text-body font-medium text-neutral-900 transition-colors hover:text-primary-500"
-              }
-            >
-              {link.label}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
+    <div className={`flex items-center ${actions ? "w-full justify-between" : ""} ${className}`}>
+      <nav aria-label="Main" className="flex items-center gap-14">
+        <Logo />
+        <ul className="flex items-center gap-10">
+          {links.map((link) => (
+            <li key={link.label}>
+              <Link
+                href={link.href ?? "#"}
+                aria-current={link.active ? "page" : undefined}
+                className={
+                  link.active
+                    ? "text-body font-medium text-primary-500"
+                    : "text-body-large font-medium text-neutral-900 transition-colors hover:text-primary-500"
+                }
+              >
+                {link.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      {actions ? <div className="flex items-center gap-4">{actions}</div> : null}
+    </div>
   );
 }
 
@@ -74,5 +104,3 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
     </nav>
   );
 }
-
-
