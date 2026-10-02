@@ -17,7 +17,7 @@ export function ProgressBar({ value, label, showLabel = true, className = "" }: 
         aria-valuemin={0}
         aria-valuemax={100}
         aria-label={text}
-        className="h-1.5 flex-1 overflow-hidden rounded-full bg-neutral-200"
+        className="h-1.5 min-w-[120px] flex-1 overflow-hidden rounded-full bg-neutral-200"
       >
         <div className="h-full rounded-full bg-primary-500" style={{ width: `${clamped}%` }} />
       </div>

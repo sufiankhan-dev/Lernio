@@ -73,8 +73,10 @@ export function SiteNav({ links, actions, className = "" }: SiteNavProps) {
   );
 }
 
+export type BreadcrumbItem = string | { label: string; href?: string };
+
 type BreadcrumbsProps = {
-  items: string[];
+  items: BreadcrumbItem[];
 };
 
 export function Breadcrumbs({ items }: BreadcrumbsProps) {
@@ -82,20 +84,21 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
     <nav aria-label="Breadcrumb">
       <ol className="flex flex-wrap items-center gap-1.5 text-small text-neutral-500">
         {items.map((item, index) => {
+          const { label, href } = typeof item === "string" ? { label: item, href: "#" } : item;
           const isLast = index === items.length - 1;
           return (
-            <li key={item} className="flex items-center gap-1.5">
+            <li key={label} className="flex items-center gap-1.5">
               {index > 0 ? (
                 <Icon name="chevron-right" size={12} className="text-neutral-300" />
               ) : null}
-              {isLast ? (
-                <span aria-current="page" className="text-neutral-900">
-                  {item}
+              {isLast || !href ? (
+                <span aria-current={isLast ? "page" : undefined} className="text-neutral-900">
+                  {label}
                 </span>
               ) : (
-                <a href="#" className="transition-colors hover:text-primary-500">
-                  {item}
-                </a>
+                <Link href={href} className="transition-colors hover:text-primary-500">
+                  {label}
+                </Link>
               )}
             </li>
           );

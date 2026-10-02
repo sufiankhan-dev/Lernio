@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CatalogCard } from "@/components/course/CatalogCard";
+import { CatalogGrid } from "@/components/course/CatalogGrid";
 import { GradientBars } from "@/components/site/GradientBars";
 import { HomeHero } from "@/components/site/HomeHero";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { WeeklyNote } from "@/components/site/WeeklyNote";
 import { Icon } from "@/components/ui/Icon";
-import { courses } from "@/lib/home-content";
+import { navLinks } from "@/lib/home-content";
+import { getCatalogCourses } from "@/sanity/lib/data";
 
 export const metadata: Metadata = {
   title: "Lernio — Search your learning in plain English",
@@ -14,10 +15,13 @@ export const metadata: Metadata = {
     "Lernio understands what you want to learn and finds the exact lessons across all your courses.",
 };
 
-export default function Home() {
+export default async function Home() {
+  const courses = await getCatalogCourses();
+  const featured = courses.filter((course) => course.slug).slice(0, 3);
+
   return (
     <div className="mx-auto flex w-full max-w-[1440px] flex-1 flex-col rounded-t-[24px] bg-canvas">
-      <SiteHeader />
+      <SiteHeader links={navLinks} />
       <HomeHero />
       <section aria-labelledby="all-courses" className="px-6 pt-14 pb-8 sm:px-8 lg:px-14">
         <div className="flex items-end justify-between gap-6">
@@ -32,10 +36,8 @@ export default function Home() {
             <Icon name="arrow-right" size={16} />
           </Link>
         </div>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {courses.map((course) => (
-            <CatalogCard key={course.slug} {...course} />
-          ))}
+        <div className="mt-8">
+          <CatalogGrid courses={featured} />
         </div>
       </section>
       <WeeklyNote />

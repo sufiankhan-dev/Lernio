@@ -4,12 +4,14 @@ import { Icon, type IconName } from "./Icon";
 
 export type ButtonVariant = "primary" | "secondary" | "tertiary" | "text";
 export type ButtonSize = "sm" | "md";
+export type ButtonIconPosition = "leading" | "trailing";
 
 type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> & {
   variant?: ButtonVariant;
   size?: ButtonSize;
   icon?: IconName;
   iconSize?: number;
+  iconPosition?: ButtonIconPosition;
   children?: ReactNode;
 };
 
@@ -39,19 +41,23 @@ export function Button({
   size = "md",
   icon,
   iconSize = 16,
+  iconPosition = "trailing",
   children,
   className = "",
   type = "button",
   ...rest
 }: ButtonProps) {
+  const glyph = icon ? <Icon name={icon} size={iconSize} className="shrink-0" /> : null;
+
   return (
     <button
       type={type}
       className={`${base} ${sizes[size]} ${variants[variant]} ${className}`}
       {...rest}
     >
+      {iconPosition === "leading" ? glyph : null}
       <span className="min-w-0 truncate">{children}</span>
-      {icon ? <Icon name={icon} size={iconSize} className="shrink-0" /> : null}
+      {iconPosition === "trailing" ? glyph : null}
     </button>
   );
 }
@@ -61,6 +67,7 @@ type LinkButtonProps = {
   size?: ButtonSize;
   icon?: IconName;
   iconSize?: number;
+  iconPosition?: ButtonIconPosition;
   children?: ReactNode;
   className?: string;
   href?: string;
@@ -71,14 +78,18 @@ export function LinkButton({
   size = "md",
   icon,
   iconSize = 16,
+  iconPosition = "trailing",
   children,
   className = "",
   href = "/",
 }: LinkButtonProps) {
+  const glyph = icon ? <Icon name={icon} size={iconSize} className="shrink-0" /> : null;
+
   return (
     <Link href={href} className={`${base} ${sizes[size]} ${variants[variant]} ${className}`}>
+      {iconPosition === "leading" ? glyph : null}
       <span className="min-w-0 truncate">{children}</span>
-      {icon ? <Icon name={icon} size={iconSize} className="shrink-0" /> : null}
+      {iconPosition === "trailing" ? glyph : null}
     </Link>
   );
 }
