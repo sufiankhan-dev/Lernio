@@ -33,15 +33,24 @@ export async function getCatalogCourses() {
 export type CatalogCourse = Awaited<ReturnType<typeof getCatalogCourses>>[number]
 
 export async function getCourseSlugs() {
-  const { data } = await sanityFetch({ query: COURSE_SLUGS_QUERY, stega: false })
+  // `perspective` is passed explicitly so this fetch makes no cookie or
+  // draftMode() call, which `generateStaticParams` cannot do at build time.
+  const { data } = await sanityFetch({
+    query: COURSE_SLUGS_QUERY,
+    perspective: 'published',
+    stega: false,
+  })
 
   return (data ?? []).map(({ slug }) => slug)
 }
 
 export async function getCourseBySlug(slug: string) {
+  // Explicit `perspective` for the same reason as `getCourseSlugs`: this runs
+  // during static generation, where there is no request to read cookies from.
   const { data } = await sanityFetch({
     query: COURSE_DETAIL_QUERY,
     params: { slug },
+    perspective: 'published',
     stega: false,
   })
 
