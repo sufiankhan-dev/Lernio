@@ -35,6 +35,7 @@
     "agent",
     ".agents",
     ".claude",
-    ".next"
+    ".next",
+    "studio"
   ]
 }
