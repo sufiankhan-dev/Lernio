@@ -1,0 +1,137 @@
+import { defineArrayMember, defineField, defineType } from 'sanity'
+import { BookIcon } from '@sanity/icons'
+
+export const course = defineType({
+  name: 'course',
+  title: 'Course',
+  type: 'document',
+  icon: BookIcon,
+  groups: [
+    { name: 'content', title: 'Content', default: true },
+    { name: 'details', title: 'Details' },
+    { name: 'curriculum', title: 'Curriculum' },
+  ],
+  fields: [
+    defineField({
+      name: 'title',
+      title: 'Title',
+      type: 'string',
+      group: 'content',
+      validation: (rule) => rule.required().max(120),
+    }),
+    defineField({
+      name: 'slug',
+      title: 'Slug',
+      type: 'slug',
+      group: 'content',
+      options: { source: 'title', maxLength: 96 },
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: 'summary',
+      title: 'Summary',
+      type: 'text',
+      rows: 3,
+      group: 'content',
+      description: 'One or two sentences. Shown on the catalog card and the course page.',
+      validation: (rule) => rule.required().max(320),
+    }),
+    defineField({
+      name: 'learningOutcomes',
+      title: 'Learning outcomes',
+      type: 'array',
+      group: 'content',
+      description: 'The "What you\'ll learn" grid on the course page.',
+      of: [defineArrayMember({ type: 'learningOutcome' })],
+      validation: (rule) => rule.min(1).max(8).unique(),
+    }),
+    defineField({
+      name: 'coverImage',
+      title: 'Cover image',
+      type: 'image',
+      group: 'content',
+      options: { hotspot: true },
+      fields: [
+        defineField({
+          name: 'alt',
+          title: 'Alternative text',
+          type: 'string',
+          validation: (rule) => rule.required(),
+        }),
+      ],
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: 'level',
+      title: 'Level',
+      type: 'string',
+      group: 'details',
+      options: {
+        list: [
+          { title: 'Beginner', value: 'beginner' },
+          { title: 'Intermediate', value: 'intermediate' },
+          { title: 'Advanced', value: 'advanced' },
+        ],
+        layout: 'radio',
+      },
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: 'price',
+      title: 'Price',
+      type: 'number',
+      group: 'details',
+      description: 'In the display currency. 0 marks the course as free.',
+      validation: (rule) => rule.required().min(0).precision(2),
+    }),
+    defineField({
+      name: 'isPopular',
+      title: 'Popular',
+      type: 'boolean',
+      group: 'details',
+      description: 'Shows the Popular badge. Display only.',
+      initialValue: false,
+    }),
+    defineField({
+      name: 'studentCount',
+      title: 'Student count',
+      type: 'number',
+      group: 'details',
+      description: 'Display only. Not derived from progress.',
+      validation: (rule) => rule.min(0).integer(),
+    }),
+    defineField({
+      name: 'instructor',
+      title: 'Instructor',
+      type: 'reference',
+      group: 'details',
+      to: [{ type: 'instructor' }],
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: 'category',
+      title: 'Category',
+      type: 'reference',
+      group: 'details',
+      to: [{ type: 'category' }],
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: 'modules',
+      title: 'Modules',
+      type: 'array',
+      group: 'curriculum',
+      description:
+        'Order matters. Module and lesson numbers shown in the UI are derived from this order.',
+      of: [defineArrayMember({ type: 'module' })],
+      validation: (rule) => rule.min(1).unique(),
+    }),
+  ],
+  preview: {
+    select: {
+      title: 'title',
+      subtitle: 'category.title',
+      media: 'coverImage',
+    },
+  },
+})

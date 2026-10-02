@@ -1,0 +1,20 @@
+# dependencies
+/node_modules
+
+# compiled studio
+/dist
+/.sanity
+
+# logs
+/logs
+*.log
+
+# generated TypeGen artifact (the generated types themselves are committed at the repo root)
+/schema.json
+
+# typescript
+*.tsbuildinfo
+
+# local-only env files
+.env*
+!.env.example

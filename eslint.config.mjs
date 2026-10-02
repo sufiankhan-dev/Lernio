@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // The Sanity Studio is a separate workspace with its own tooling.
+    "studio/**",
     // Skill reference apps are vendored examples, not project source.
     "agent/**",
     ".agents/**",
