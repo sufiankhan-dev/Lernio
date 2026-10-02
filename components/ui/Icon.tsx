@@ -14,6 +14,8 @@ export type IconName =
   | "chevron-down"
   | "chevron-left"
   | "arrow-right"
+  | "arrow-left"
+  | "lightbulb"
   | "star"
   | "check"
   | "check-circle"
@@ -107,6 +109,18 @@ const outlinePaths: Record<IconName, React.ReactNode> = {
     <>
       <path d="M4 12h15" />
       <path d="m13 6 6 6-6 6" />
+    </>
+  ),
+  "arrow-left": (
+    <>
+      <path d="M20 12H5" />
+      <path d="m11 6-6 6 6 6" />
+    </>
+  ),
+  lightbulb: (
+    <>
+      <path d="M9.4 17.5a6 6 0 1 1 5.2 0v1.2a1 1 0 0 1-1 1h-3.2a1 1 0 0 1-1-1z" />
+      <path d="M9.8 21.5h4.4" />
     </>
   ),
   star: (
@@ -268,6 +282,15 @@ const filledPaths: Record<IconName, React.ReactNode> = {
   "chevron-left": <path d="M14.7 4.3 16 5.7l-5.3 5.3 5.3 5.3-1.3 1.4L8 11.3z" />,
   "arrow-right": (
     <path d="M12.9 4.3 11.5 5.7l5.1 5.1H3.2v1.8h13.4l-5.1 5.1 1.4 1.4 6.9-6.9z" />
+  ),
+  "arrow-left": (
+    <path d="M11.1 4.3 12.5 5.7 7.4 10.8h13.4v1.8H7.4l5.1 5.1-1.4 1.4-6.9-6.9z" />
+  ),
+  lightbulb: (
+    <>
+      <path d="M12 2.2a6.6 6.6 0 0 0-3.8 11.9v2.2h7.6v-2.2A6.6 6.6 0 0 0 12 2.2z" />
+      <path d="M9.6 18.4h4.8v1.9H9.6zm0 3.1h4.8v1.3H9.6z" />
+    </>
   ),
   star: (
     <path d="m12 2.4 2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5-4.7-4.6 6.5-.9z" />

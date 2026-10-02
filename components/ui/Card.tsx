@@ -100,7 +100,7 @@ export function LessonCard({
 export type ResourceCardProps = {
   title: string;
   description: string;
-  meta: string;
+  meta?: string;
   icon?: IconName;
   actionHref?: string;
 };
@@ -118,7 +118,7 @@ export function ResourceCard({
       <h3 className="text-heading-3 font-medium text-neutral-900">{title}</h3>
       <p className="text-body text-neutral-500">{description}</p>
       <div className="mt-auto flex items-center justify-between gap-3 pt-1">
-        <span className="text-small text-neutral-500">{meta}</span>
+        {meta ? <span className="text-small text-neutral-500">{meta}</span> : <span />}
       <a
         href={actionHref}
         aria-label={`Open ${title}`}
