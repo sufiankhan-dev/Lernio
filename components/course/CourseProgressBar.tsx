@@ -14,8 +14,11 @@ export function CourseProgressBar({ value, firstLessonSlug, hasProgress }: Cours
   const label = hasProgress ? "Continue Learning" : "Start Learning";
 
   return (
-    <div className="-mt-10 px-6 sm:px-8 lg:px-16">
-      <div className="flex flex-col gap-5 rounded-lg border border-neutral-200 bg-white px-6 py-4 shadow-sm sm:flex-row sm:items-center sm:gap-8">
+    // `sticky bottom-0` pins the bar to the viewport while the page scrolls. The
+    // wrapper is transparent so the bar floats over the content instead of
+    // masking it, and z-10 keeps the card above whatever scrolls past.
+    <div className="pointer-events-none sticky bottom-0 z-10 -mt-10 px-6 pb-6 sm:px-8 lg:px-16">
+      <div className="pointer-events-auto flex flex-col gap-5 rounded-lg border border-neutral-200 bg-white px-6 py-4 shadow-lg sm:flex-row sm:items-center sm:gap-8">
         <div className="min-w-0">
           <p className="text-small text-neutral-500">Your Progress</p>
           <p className="mt-1 font-display text-heading-3 font-bold text-neutral-900">
