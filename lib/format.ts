@@ -52,3 +52,21 @@ const LEARNING_OUTCOME_ICONS: Record<string, IconName> = {
 export function learningOutcomeIcon(icon: string | null | undefined): IconName {
   return (icon && LEARNING_OUTCOME_ICONS[icon]) || "layers";
 }
+
+/**
+ * `lessonResource.type` is a closed list in the Studio schema, so every seeded
+ * value resolves. The fallback keeps an unexpected value from crashing the grid.
+ */
+const RESOURCE_ICONS: Record<string, IconName> = {
+  documentation: "document",
+  article: "document",
+  guide: "document",
+  repository: "code",
+  video: "play-circle",
+  tool: "grid",
+  other: "external-link",
+};
+
+export function resourceIcon(type: string | null | undefined): IconName {
+  return (type && RESOURCE_ICONS[type]) || "external-link";
+}
