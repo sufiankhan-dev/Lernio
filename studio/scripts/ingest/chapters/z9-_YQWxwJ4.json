@@ -1,0 +1,22 @@
+{
+  "_note": "Authored chapter markers for this video. Its YouTube description has no chapter block, so the pipeline would otherwise store no chapters and search would fall back to the noisier transcript. Times follow the transcript cues in scripts/ingest/out/videos.ndjson.",
+  "chapters": [
+    { "startSeconds": 0, "label": "What web authentication actually is" },
+    { "startSeconds": 43, "label": "Why the web is stateless" },
+    { "startSeconds": 89, "label": "Cookies and sessions, the stateful approach" },
+    { "startSeconds": 120, "label": "How a session actually flows" },
+    { "startSeconds": 144, "label": "Where sessions win: security and control" },
+    { "startSeconds": 166, "label": "Where sessions hurt: scaling out" },
+    { "startSeconds": 192, "label": "JSON Web Tokens, the stateless approach" },
+    { "startSeconds": 210, "label": "The VIP pass analogy" },
+    { "startSeconds": 233, "label": "How a JWT actually flows" },
+    { "startSeconds": 260, "label": "Why JWTs scale" },
+    { "startSeconds": 285, "label": "The trade-offs: theft, revocation, size" },
+    { "startSeconds": 311, "label": "Sessions versus JWTs side by side" },
+    { "startSeconds": 318, "label": "State lives on the server or on the client" },
+    { "startSeconds": 364, "label": "Security rules you cannot skip" },
+    { "startSeconds": 390, "label": "Short lived access tokens, longer lived refresh tokens" },
+    { "startSeconds": 403, "label": "Which one should you choose" },
+    { "startSeconds": 452, "label": "There is no single best solution" }
+  ]
+}
