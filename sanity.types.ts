@@ -33,6 +33,39 @@ export type Slug = {
   source?: string;
 };
 
+export type VideoChunk = {
+  _type: "videoChunk";
+  startSeconds?: number;
+  text?: string;
+};
+
+export type VideoChapter = {
+  _type: "videoChapter";
+  startSeconds?: number;
+  label?: string;
+};
+
+export type Video = {
+  _id: string;
+  _type: "video";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  id?: string;
+  url?: string;
+  title?: string;
+  chapters?: Array<
+    {
+      _key: string;
+    } & VideoChapter
+  >;
+  chunks?: Array<
+    {
+      _key: string;
+    } & VideoChunk
+  >;
+};
+
 export type LessonResource = {
   _type: "lessonResource";
   type?:
@@ -332,6 +365,9 @@ export type Geopoint = {
 export type AllSanitySchemaTypes =
   | SanityAgentContext
   | Slug
+  | VideoChunk
+  | VideoChapter
+  | Video
   | LessonResource
   | LearningOutcome
   | LessonReference
