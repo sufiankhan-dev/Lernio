@@ -9,6 +9,9 @@
 /logs
 *.log
 
+# video ingestion output, reproducible from the dataset with `npm run ingest:videos`
+/scripts/ingest/out
+
 # generated TypeGen artifact (the generated types themselves are committed at the repo root)
 /schema.json
 

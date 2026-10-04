@@ -6,6 +6,9 @@ import { LinkButton } from "./Button";
 const shell =
   "flex flex-col gap-3 rounded-lg border border-neutral-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md";
 
+/** The shared card surface. Reused by the search result card. */
+export const cardShell = shell;
+
 export type CourseCardProps = {
   title: string;
   description: string;
@@ -66,6 +69,7 @@ export type LessonCardProps = {
   description: string;
   meta?: string;
   action?: string;
+  actionHref?: string;
   actionIcon?: IconName;
   children?: ReactNode;
 };
@@ -76,6 +80,7 @@ export function LessonCard({
   description,
   meta,
   action,
+  actionHref = "#",
   actionIcon = "external-link",
   children,
 }: LessonCardProps) {
@@ -88,7 +93,7 @@ export function LessonCard({
       <div className="mt-auto flex items-center justify-between gap-3 pt-1">
         {meta ? <span className="text-small text-neutral-500">{meta}</span> : <span />}
         {action ? (
-          <LinkButton variant="text" icon={actionIcon} className="text-small" href="#">
+          <LinkButton variant="text" icon={actionIcon} className="text-small" href={actionHref}>
             {action}
           </LinkButton>
         ) : null}

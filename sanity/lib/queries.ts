@@ -144,3 +144,52 @@ export const CATEGORIES_QUERY = defineQuery(`
     description
   }
 `)
+
+/**
+ * The search agent reads the Context document that configures the MCP endpoint.
+ * Returns nothing when no document matches the slug, which is the signal to fall
+ * back to the base MCP URL and rely on the inline system prompt alone.
+ */
+export const AGENT_CONTEXT_QUERY = defineQuery(`
+  *[_type == "sanity.agentContext" && slug.current == $slug][0]{
+    _id,
+    name,
+    "slug": slug.current,
+    groqFilter,
+    instructions
+  }
+`)
+
+/**
+ * Resolves the lesson ids the search agent selected into fully projected cards.
+ *
+ * The agent returns ids only. Every string rendered on the results page comes from
+ * here, so a hallucinated id resolves to nothing and is dropped rather than shown.
+ *
+ * Ordering is the agent's contribution, applied after hydration, not GROQ's
+ * `order()`. The course arrives through a reverse reference because the lesson
+ * document does not store its parent, and the nested `modules` array is what the
+ * module and lesson numbers are derived from.
+ */
+export const SEARCH_HYDRATE_QUERY = defineQuery(`
+  *[_type == "lesson" && _id in $ids]{
+    _id,
+    _createdAt,
+    title,
+    "slug": slug.current,
+    summary,
+    duration,
+    keyPoints,
+    "course": *[_type == "course" && references(^._id)][0]{
+      _id,
+      title,
+      "slug": slug.current,
+      "category": category->{_id, title, "slug": slug.current},
+      modules[]{
+        _key,
+        title,
+        "lessons": lessons[]->{_id}
+      }
+    }
+  }
+`)

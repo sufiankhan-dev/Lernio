@@ -4,6 +4,11 @@ import { dataset, projectId } from './env'
 
 export default defineCliConfig({
   api: { projectId, dataset },
+  deployment: {
+    // Assigned when the Studio was first deployed to https://lernio.sanity.studio.
+    // Pinning it keeps future deploys from prompting for an application id.
+    appId: 'elzeeer5i2dl7bmhd5lbyldg',
+  },
   typegen: {
     enabled: true,
     // All GROQ for the web app lives in the root workspace under sanity/.
