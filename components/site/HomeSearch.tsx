@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { SearchField } from "@/components/ui/Field";
 
 export function HomeSearch() {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -20,10 +22,18 @@ export function HomeSearch() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const trimmed = query.trim();
+    if (!trimmed) return;
+
+    router.push(`/search?q=${encodeURIComponent(trimmed.slice(0, 200))}`);
+  }
+
   return (
     <form
       role="search"
-      onSubmit={(event) => event.preventDefault()}
+      onSubmit={onSubmit}
       className="w-full"
       aria-label="Search your learning"
     >

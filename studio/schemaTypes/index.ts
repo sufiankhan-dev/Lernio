@@ -1,5 +1,6 @@
 import type { SchemaTypeDefinition } from 'sanity'
 
+import { agentContext } from './documents/agent-context'
 import { category } from './documents/category'
 import { course } from './documents/course'
 import { instructor } from './documents/instructor'
@@ -9,5 +10,14 @@ import { lessonResource } from './objects/lesson-resource'
 import { module } from './objects/module'
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [course, lesson, instructor, category, module, learningOutcome, lessonResource],
+  types: [
+    course,
+    lesson,
+    instructor,
+    category,
+    module,
+    learningOutcome,
+    lessonResource,
+    agentContext,
+  ],
 }

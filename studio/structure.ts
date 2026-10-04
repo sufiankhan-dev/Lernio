@@ -17,4 +17,14 @@ export const structure: StructureResolver = (S) =>
               S.documentTypeListItem('instructor').title('Instructors'),
             ]),
         ),
+      S.divider(),
+      S.listItem()
+        .title('Search')
+        .child(
+          S.list()
+            .title('Search')
+            .items([
+              S.documentTypeListItem('sanity.agentContext').title('Agent Context'),
+            ]),
+        ),
     ])
