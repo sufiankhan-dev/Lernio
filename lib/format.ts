@@ -19,6 +19,25 @@ export function formatDuration(minutes: number | null | undefined) {
   return `${hours}h ${mins}m`;
 }
 
+/**
+ * A position inside a video, as the seconds a search result matched.
+ *
+ * 765 -> "12:45", 45 -> "0:45", 4520 -> "1:15:20". Minutes and seconds are always
+ * zero-padded to two digits so a column of these labels up, which matters because a
+ * search result carries several of them at once. Hours appear only when needed.
+ */
+export function formatTimestamp(seconds: number | null | undefined) {
+  const total = Math.max(0, Math.floor(seconds ?? 0));
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const secs = total % 60;
+
+  const pad = (value: number) => String(value).padStart(2, "0");
+
+  if (hours === 0) return `${minutes}:${pad(secs)}`;
+  return `${hours}:${pad(minutes)}:${pad(secs)}`;
+}
+
 /** 2100 -> "2.1k", 940 -> "940", 0 -> "0". */
 export function formatStudentCount(count: number | null | undefined) {
   const total = Math.max(0, Math.round(count ?? 0));

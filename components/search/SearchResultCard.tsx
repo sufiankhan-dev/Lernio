@@ -3,10 +3,10 @@ import { Badge } from "@/components/ui/Badge";
 import { LinkButton } from "@/components/ui/Button";
 import { cardShell } from "@/components/ui/Card";
 import { formatDuration } from "@/lib/format";
-import type { SearchResultCardData } from "@/lib/search-types";
+import type { SearchLessonResult } from "@/lib/search-types";
 
 export type SearchResultCardProps = {
-  result: SearchResultCardData;
+  result: SearchLessonResult;
 };
 
 function initials(title: string) {
