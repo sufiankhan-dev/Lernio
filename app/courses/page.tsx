@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { CatalogGrid } from "@/components/course/CatalogGrid";
-import { GradientBars } from "@/components/site/GradientBars";
 import { SiteHeader } from "@/components/site/SiteHeader";
+import { SiteFooter } from "@/components/site/SiteFooter";
 import { navLinks } from "@/lib/home-content";
 import { getCatalogCourses } from "@/sanity/lib/data";
 
@@ -35,7 +35,7 @@ export default async function CoursesPage() {
         )}
       </main>
 
-      <GradientBars />
+      <SiteFooter />
     </div>
   );
 }

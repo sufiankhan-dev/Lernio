@@ -3,7 +3,7 @@ import { Button, LinkButton } from "@/components/ui/Button";
 import { CourseCard, LessonCard, ResourceCard } from "@/components/ui/Card";
 import { SearchField, SelectField } from "@/components/ui/Field";
 import { Icon, type IconName } from "@/components/ui/Icon";
-import { Breadcrumbs, SiteNav } from "@/components/ui/Nav";
+import { Breadcrumbs, Logo, SiteNav } from "@/components/ui/Nav";
 import { Pagination } from "@/components/ui/Pagination";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -11,11 +11,25 @@ import { StatusIndicator } from "@/components/ui/StatusIndicator";
 import styles from "./design-system.module.css";
 
 const primarySwatches = [
-  { name: "Primary 500", hex: "#FB7316", className: "bg-primary-500" },
-  { name: "Primary 400", hex: "#FB923C", className: "bg-primary-400" },
-  { name: "Primary 300", hex: "#FDBA74", className: "bg-primary-300" },
-  { name: "Primary 200", hex: "#FED7AA", className: "bg-primary-200" },
-  { name: "Primary 100", hex: "#FFEEE5", className: "bg-primary-100" },
+  { name: "Primary 900", hex: "#063529", className: "bg-primary-900" },
+  { name: "Primary 800", hex: "#084535", className: "bg-primary-800" },
+  { name: "Primary 700", hex: "#0B5641", className: "bg-primary-700" },
+  { name: "Primary 600", hex: "#0F6B4F", className: "bg-primary-600" },
+  { name: "Primary 500", hex: "#15805F", className: "bg-primary-500" },
+  { name: "Primary 400", hex: "#3AA47F", className: "bg-primary-400" },
+  { name: "Primary 300", hex: "#79C4A7", className: "bg-primary-300" },
+  { name: "Primary 200", hex: "#B0E0CC", className: "bg-primary-200" },
+  { name: "Primary 100", hex: "#DCF2E8", className: "bg-primary-100" },
+];
+
+const tealSwatches = [
+  { name: "Teal 700", hex: "#0F766E", className: "bg-teal-700" },
+  { name: "Teal 600", hex: "#0D9488", className: "bg-teal-600" },
+  { name: "Teal 500", hex: "#14B8A6", className: "bg-teal-500" },
+  { name: "Teal 400", hex: "#2DD4BF", className: "bg-teal-400" },
+  { name: "Teal 300", hex: "#5EEAD4", className: "bg-teal-300" },
+  { name: "Teal 200", hex: "#99F6E4", className: "bg-teal-200" },
+  { name: "Teal 100", hex: "#CCFBF1", className: "bg-teal-100" },
 ];
 
 const neutralSwatches = [
@@ -30,14 +44,14 @@ const neutralSwatches = [
 ];
 
 const typeScale = [
-  { style: "Display 1", font: "Playfair Display", size: "48 / 56", weight: "Bold", use: "Page titles" },
-  { style: "Display 2", font: "Playfair Display", size: "36 / 44", weight: "Bold", use: "Section titles" },
-  { style: "Heading 1", font: "Inter", size: "28 / 36", weight: "SemiBold", use: "Card titles" },
-  { style: "Heading 2", font: "Inter", size: "22 / 30", weight: "SemiBold", use: "Sub section" },
-  { style: "Heading 3", font: "Inter", size: "18 / 26", weight: "Medium", use: "Small titles" },
-  { style: "Body Large", font: "Inter", size: "16 / 24", weight: "Regular", use: "Body copy" },
-  { style: "Body", font: "Inter", size: "14 / 20", weight: "Regular", use: "Supporting text" },
-  { style: "Small", font: "Inter", size: "12 / 16", weight: "Regular", use: "Captions, meta" },
+  { style: "Display 1", font: "Outfit", size: "48 / 56", weight: "Bold", use: "Page titles" },
+  { style: "Display 2", font: "Outfit", size: "36 / 44", weight: "Bold", use: "Section titles" },
+  { style: "Heading 1", font: "Outfit", size: "28 / 36", weight: "SemiBold", use: "Card titles" },
+  { style: "Heading 2", font: "Outfit", size: "22 / 30", weight: "SemiBold", use: "Sub section" },
+  { style: "Heading 3", font: "Outfit", size: "18 / 26", weight: "Medium", use: "Small titles" },
+  { style: "Body Large", font: "Outfit", size: "16 / 24", weight: "Regular", use: "Body copy" },
+  { style: "Body", font: "Outfit", size: "14 / 20", weight: "Regular", use: "Supporting text" },
+  { style: "Small", font: "Outfit", size: "12 / 16", weight: "Regular", use: "Captions, meta" },
 ];
 
 const spacing = [
@@ -107,15 +121,7 @@ export default function DesignSystemPage() {
       <div className={styles.grid} style={{ gridTemplateColumns: "minmax(0, 1fr)" }}>
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
           <section className={`${styles.panel} ${styles.hero}`}>
-            <div className="flex items-center gap-2">
-              <svg viewBox="0 0 24 24" width={34} height={34} aria-hidden="true">
-                <rect x="2" y="2" width="20" height="20" rx="6" fill="#FB7316" />
-                <path d="M8 6.5h2.6v8.9H16V18H8z" fill="#fff" />
-              </svg>
-              <span className="font-display text-heading-1 font-bold tracking-tight text-neutral-900">
-                Lernio
-              </span>
-            </div>
+            <Logo />
             <h1 className="font-display text-display-2 font-bold leading-[2.75rem] text-neutral-900">
               Design System
             </h1>
@@ -136,6 +142,10 @@ export default function DesignSystemPage() {
                 <Swatches items={primarySwatches} />
               </div>
               <div>
+                <p className="mb-2.5 text-body font-medium text-neutral-900">Teal accent</p>
+                <Swatches items={tealSwatches} />
+              </div>
+              <div>
                 <p className="mb-2.5 text-body font-medium text-neutral-900">Neutral</p>
                 <Swatches items={neutralSwatches} />
               </div>
@@ -151,25 +161,18 @@ export default function DesignSystemPage() {
                 <span className={`${styles.specimen} font-display`}>Ag</span>
                 <div>
                   <p className="text-heading-2 font-display font-semibold text-neutral-900">
-                    Playfair Display
+                    Outfit
                   </p>
                   <p className="mt-1.5 text-body text-neutral-500">
-                    Elegant{" "}
-                    <span className="mx-0.5 text-primary-500">•</span> Readable{" "}
-                    <span className="mx-0.5 text-primary-500">•</span> Timeless
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-8">
-                <span className={`${styles.specimen} font-sans font-medium`}>Ag</span>
-                <div>
-                  <p className="text-heading-2 font-semibold text-neutral-900">Inter</p>
-                  <p className="mt-1.5 text-body text-neutral-500">
-                    Clean <span className="mx-0.5 text-primary-500">•</span> Modern{" "}
+                    Geometric <span className="mx-0.5 text-primary-500">•</span> Friendly{" "}
                     <span className="mx-0.5 text-primary-500">•</span> Highly legible
                   </p>
                 </div>
               </div>
+              <p className="text-small text-neutral-500">
+                One family across display, heading and body. <code className="ds-spec-code">--font-display</code>{" "}
+                and <code className="ds-spec-code">--font-sans</code> both resolve to it.
+              </p>
             </div>
           </section>
 
@@ -319,7 +322,7 @@ export default function DesignSystemPage() {
               <li>Height: 44px (default)</li>
               <li>Padding: 0 16px (lg), 0 12px (md)</li>
               <li>Radius: 12px</li>
-              <li>Font: Inter Medium (14–16px)</li>
+              <li>Font: Outfit Medium (14–16px)</li>
             </ul>
           </section>
 
@@ -339,7 +342,7 @@ export default function DesignSystemPage() {
               <li>Radius: 12px</li>
               <li>Border: 1px solid #E2E8F0</li>
               <li>Padding: 0 16px</li>
-              <li>Focus: Border color #FB923C</li>
+              <li>Focus: Border color #15805F</li>
             </ul>
           </section>
         </div>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { SearchPanel } from "@/components/search/SearchPanel";
 import { SiteHeader } from "@/components/site/SiteHeader";
-import { GradientBars } from "@/components/site/GradientBars";
+import { SiteFooter } from "@/components/site/SiteFooter";
 import { navLinks } from "@/lib/home-content";
 
 export const metadata: Metadata = {
@@ -46,7 +46,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
         </div>
       </main>
 
-      <GradientBars />
+      <SiteFooter />
     </div>
   );
 }

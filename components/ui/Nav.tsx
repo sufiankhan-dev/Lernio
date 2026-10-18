@@ -2,29 +2,39 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Icon } from "./Icon";
 
+/**
+ * The Lernio mark: a white "L" knocked out of an emerald rounded square.
+ *
+ * This is the single definition of the logo. The design-system page renders this
+ * component rather than its own copy, so the documentation cannot drift from the
+ * header and footer.
+ */
 export function BrandMark({ size = 30, className = "" }: { size?: number; className?: string }) {
   return (
     <svg
-      viewBox="0 0 32 32"
+      viewBox="0 0 24 24"
       width={size}
       height={size}
       className={className}
       aria-hidden="true"
       focusable="false"
     >
-      <defs>
-        <linearGradient id="lernio-brand-mark" x1="7" y1="3" x2="25" y2="30" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#FB923C" />
-          <stop offset="1" stopColor="#F05A05" />
-        </linearGradient>
-      </defs>
-      <path d="M2 4h11.3L16 29.6z" fill="url(#lernio-brand-mark)" />
-      <path d="M18.7 4H30L16 29.6z" fill="url(#lernio-brand-mark)" />
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="var(--color-primary-500)" />
+      <path d="M8 6.5h2.6v8.9H16V18H8z" fill="#fff" />
     </svg>
   );
 }
 
-export function Logo({ className = "", href }: { className?: string; href?: string }) {
+export function Logo({
+  className = "",
+  href,
+  tone = "dark",
+}: {
+  className?: string;
+  href?: string;
+  /** "light" is for the dark footer band; the header stays "dark". */
+  tone?: "dark" | "light";
+}) {
   return (
     <Link
       href={href ?? "/"}
@@ -32,7 +42,11 @@ export function Logo({ className = "", href }: { className?: string; href?: stri
       aria-label="Lernio home"
     >
       <BrandMark />
-      <span className="font-display text-heading-1 leading-none font-bold tracking-tight text-neutral-900">
+      <span
+        className={`font-display text-heading-1 leading-none font-bold tracking-tight ${
+          tone === "light" ? "text-white" : "text-neutral-900"
+        }`}
+      >
         Lernio
       </span>
     </Link>
