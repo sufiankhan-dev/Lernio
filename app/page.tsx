@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CatalogGrid } from "@/components/course/CatalogGrid";
-import { GradientBars } from "@/components/site/GradientBars";
 import { HomeHero } from "@/components/site/HomeHero";
 import { SiteHeader } from "@/components/site/SiteHeader";
+import { SiteFooter } from "@/components/site/SiteFooter";
 import { WeeklyNote } from "@/components/site/WeeklyNote";
 import { Icon } from "@/components/ui/Icon";
 import { navLinks } from "@/lib/home-content";
@@ -41,7 +41,7 @@ export default async function Home() {
         </div>
       </section>
       <WeeklyNote />
-      <GradientBars />
+      <SiteFooter />
     </div>
   );
 }

@@ -4,8 +4,8 @@ import { CourseContent, type CourseModule } from "@/components/course/CourseCont
 import { CourseHero } from "@/components/course/CourseHero";
 import { CourseProgressBar } from "@/components/course/CourseProgressBar";
 import { LearningOutcomes } from "@/components/course/LearningOutcomes";
-import { GradientBars } from "@/components/site/GradientBars";
 import { SiteHeader } from "@/components/site/SiteHeader";
+import { SiteFooter } from "@/components/site/SiteFooter";
 import { Breadcrumbs } from "@/components/ui/Nav";
 import { navLinks } from "@/lib/home-content";
 import { getCourseBySlug, getCourseSlugs } from "@/sanity/lib/data";
@@ -114,7 +114,7 @@ export default async function CoursePage(props: PageProps<"/courses/[slug]">) {
         />
       </main>
 
-      <GradientBars />
+      <SiteFooter />
       <CourseProgressBar
         value={progressPercent}
         firstLessonSlug={firstLessonSlug}

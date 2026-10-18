@@ -4,9 +4,11 @@ import { Icon, type IconName } from "./Icon";
 export type BadgeVariant = "video" | "lesson" | "popular";
 
 const variants: Record<BadgeVariant, string> = {
-  video: "bg-primary-100 text-primary-500",
-  lesson: "bg-indigo-100 text-indigo-700",
-  popular: "bg-primary-100 text-primary-500 border border-primary-200",
+  // Badge text is primary-600, not primary-500: 600 is 5.53:1 on primary-100 and
+  // 500 is only 4.18:1, which fails AA at this 12px size.
+  video: "bg-primary-100 text-primary-600",
+  lesson: "bg-teal-100 text-teal-700",
+  popular: "bg-primary-100 text-primary-600 border border-primary-200",
 };
 
 type BadgeProps = {

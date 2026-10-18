@@ -9,6 +9,7 @@ import { LessonSidebar, type LessonSidebarModule } from "@/components/lesson/Les
 import { LessonTabs } from "@/components/lesson/LessonTabs";
 import { VideoPlayer } from "@/components/lesson/VideoPlayer";
 import { SiteHeader } from "@/components/site/SiteHeader";
+import { SiteFooter } from "@/components/site/SiteFooter";
 import { Breadcrumbs } from "@/components/ui/Nav";
 import { Icon } from "@/components/ui/Icon";
 import { navLinks } from "@/lib/home-content";
@@ -166,6 +167,7 @@ export default async function LessonPage(props: PageProps<"/lessons/[slug]">) {
       </div>
 
       <LessonNavigation previous={previous} next={next} />
+      <SiteFooter />
     </div>
   );
 }

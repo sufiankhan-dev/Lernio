@@ -1,15 +1,19 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary-100: #ffeee5;
-  --color-primary-200: #fed7aa;
-  --color-primary-300: #fdba74;
-  --color-primary-400: #fb923c;
-  --color-primary-500: #fb7316;
-  --color-primary-600: #f05a05;
-  --color-primary-700: #c74904;
-  --color-primary-800: #9c3a0c;
-  --color-primary-900: #7d310e;
+  /* Deep pine emerald. Measured for WCAG AA rather than picked by eye: white on
+     --color-primary-500 is 4.90:1 and 500 as link text on the canvas is 4.67:1.
+     Stock Tailwind emerald (#10b981) is 2.54:1 and 2.42:1 on the same two tests and
+     fails both, which is why this ramp is not the stock one. */
+  --color-primary-100: #dcf2e8;
+  --color-primary-200: #b0e0cc;
+  --color-primary-300: #79c4a7;
+  --color-primary-400: #3aa47f;
+  --color-primary-500: #15805f;
+  --color-primary-600: #0f6b4f;
+  --color-primary-700: #0b5641;
+  --color-primary-800: #084535;
+  --color-primary-900: #063529;
 
   --color-neutral-50: #fafcff;
   --color-neutral-100: #f1f5f9;
@@ -23,16 +27,28 @@
   --color-neutral-900: #0f172a;
 
   --color-white: #ffffff;
-  --color-canvas: #fbf8f5;
-  --color-indigo-100: #eef2ff;
-  --color-indigo-500: #6366f1;
-  --color-indigo-700: #4338ca;
+  --color-canvas: #f4f8f7;
+
+  /* Teal accent. The only consumers are the lesson badge and the search result
+     types that sit beside the primary family. */
+  --color-teal-100: #ccfbf1;
+  --color-teal-200: #99f6e4;
+  --color-teal-300: #5eead4;
+  --color-teal-400: #2dd4bf;
+  --color-teal-500: #14b8a6;
+  --color-teal-600: #0d9488;
+  --color-teal-700: #0f766e;
+
   --color-success-100: #dcfce7;
   --color-success-500: #22c55e;
   --color-success-700: #15803d;
 
-  --font-display: var(--font-playfair), Georgia, "Times New Roman", serif;
-  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+  /* One typeface. Both tokens resolve to Outfit, so `font-display` and `font-sans`
+     are interchangeable today and adding a second family later is a token change
+     rather than a sweep through the markup. */
+  --font-display: var(--font-outfit), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-sans: var(--font-outfit), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
 
   --text-hero: clamp(2.5rem, 6.4vw, 4rem);
@@ -92,7 +108,9 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-primary-400);
+    /* primary-400 is only 2.94:1 against the canvas and fails the 3:1 non-text
+       minimum; primary-500 is 4.67:1 and stays visible on cards too. */
+    outline: 2px solid var(--color-primary-500);
     outline-offset: 2px;
   }
 }

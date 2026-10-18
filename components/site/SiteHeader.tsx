@@ -1,7 +1,7 @@
-import { Icon } from "@/components/ui/Icon";
 import { SiteNav } from "@/components/ui/Nav";
 import { navLinks } from "@/lib/home-content";
 import { AuthControls } from "./AuthControls";
+import { NotificationsMenu } from "./NotificationsMenu";
 
 type SiteHeaderProps = {
   links?: { label: string; href?: string; active?: boolean }[];
@@ -16,13 +16,7 @@ export function SiteHeader({ links = navLinks }: SiteHeaderProps) {
             links={links}
             actions={
               <>
-                <button
-                  type="button"
-                  aria-label="Notifications"
-                  className="flex size-10 items-center justify-center rounded-full text-neutral-900 transition-colors hover:bg-neutral-100"
-                >
-                  <Icon name="bell" size={24} />
-                </button>
+                <NotificationsMenu />
                 <AuthControls />
               </>
             }
