@@ -1,27 +1,49 @@
 import "server-only";
 
-import type { SearchResultCardData, SearchResultsPayload } from "@/lib/search-types";
+import type {
+  SearchLessonResult,
+  SearchResultCardData,
+  SearchResultsPayload,
+  SearchSelection,
+  SearchVideoResult,
+} from "@/lib/search-types";
 import { dataset, projectId } from "@/sanity/env";
 import { client } from "@/sanity/lib/client";
 import {
   AGENT_CONTEXT_QUERY,
   SEARCH_HYDRATE_QUERY,
+  SEARCH_VIDEO_LESSONS_QUERY,
+  SEARCH_VIDEO_QUERY,
 } from "@/sanity/lib/queries";
+import { toVideoDocumentId } from "@/lib/video";
 
 /**
  * Everything that talks to the Sanity Context MCP lives here.
  *
- * Three rules hold across this module:
+ * Four rules hold across this module:
  * - The read token and the LLM key never leave the server. The browser never calls
  *   the MCP or the LLM.
- * - The agent contributes ids and ordering. Every string rendered on the results
- *   page is projected here, so an invented id resolves to nothing and is dropped.
+ * - The agent contributes ids, seconds and ordering. Every string rendered on the
+ *   results page is projected here, so an invented id resolves to nothing and is
+ *   dropped, and a second that matches no chapter or chunk boundary is dropped too.
+ * - A video moment resolves in two stages. Chapters first, because their labels are
+ *   clean. The transcript only when no chapter matched for that video.
  * - Cached context is cached for the process lifetime, so edits to the inline
  *   system prompt only take effect after a server restart.
  */
 
 const MCP_API_VERSION = "v2026-03-03";
 const CACHE_TTL_MS = 5 * 60 * 1000;
+
+/**
+ * How far a reported second may sit from a real boundary and still be accepted.
+ *
+ * The agent copies `startSeconds` verbatim from a query result, so an exact match is
+ * the normal case and five seconds only absorbs the rounding a model occasionally
+ * does. It is deliberately far tighter than any real chapter or chunk spacing, so it
+ * cannot turn a wrong second into a plausible one.
+ */
+const SNAP_TOLERANCE_SECONDS = 5;
 
 let cachedInitialContext: string | null = null;
 let cacheTimestamp = 0;
@@ -141,34 +163,47 @@ export function buildSystemPrompt(input: {
   initialContext: string | null;
   instructions: string | null;
   maxResults: number;
+  maxQueries: number;
 }): string {
-  const { initialContext, instructions, maxResults } = input;
+  const { initialContext, instructions, maxResults, maxQueries } = input;
 
   const sections = [
-    "You are the search index behind Lernio, a learning platform. A learner types a plain language question and you find the lessons in the course library that answer it.",
+    "You are the search index behind Lernio, a learning platform. A learner types a plain language question and you find the lessons and the exact moments inside their videos that answer it.",
     "",
     "## How to search",
     "- Use the groq_query tool to search. Your training data knows nothing about this catalog.",
     '- GROQ has no match() function. Text matching uses the match OPERATOR: title match "*fetch*". It is case-insensitive.',
     '- The wildcards are required. title match "fetch" matches nothing. Always write "*" + $kw + "*".',
     "- Search token by token and OR the tokens together. Never rely on a multi-word phrase as a single pattern.",
+    "- Filtering an array of objects needs the @. accessor: chapters[@.label match $kw], not chapters[@ label match $kw], which is a parse error.",
     "- Filter a string array with the array form: count(keyPoints[@ match $kw]) > 0.",
     "- notes is Portable Text. pt::text(notes) collapses the whole field into ONE string, so apply the operator to it directly: pt::text(notes) match $kw. Do not wrap it in count() and do not filter it like an array; both silently match nothing.",
     "- Search a few different ways before you conclude: match titles and summaries, then key points, then the notes projection.",
-    "- Use at most 4 groq_query calls. Once you have covered those passes, stop querying and answer. Every extra call costs a request against a rate limit and stops you from ever producing an answer.",
-    "- Return every lesson that genuinely matches, up to " +
+    "- Use at most " +
+      String(maxQueries) +
+      " groq_query calls. Once you have covered those passes, stop querying and answer. Every extra call costs a request against a rate limit and stops you from ever producing an answer.",
+    "- Return every lesson and every video moment that genuinely matches, up to " +
       String(maxResults) +
       ". Do not stop at the first few and do not pad the list with weak matches.",
     "",
+    "## How to match a video, in two stages",
+    "A video document holds the intelligence for one lesson's video. Match it in two stages, in this order.",
+    "1. Chapters first. A video has a chapters array whose labels are clean. Filter it with count(chapters[@.label match $kw]) > 0 and project chapters[@.label match $kw]{startSeconds, label}.",
+    "2. The transcript only as a fallback. Most videos have no chapters at all, so when a video produced no matching chapter, match its transcript with count(chunks[@.text match $kw]) > 0 and project chunks[@.text match $kw]{startSeconds, text}.",
+    "- Project only the entries that matched. Never select a whole chapters or chunks array to read it: a full transcript overflows the context window.",
+    "- A video document is an internal lookup and is never a result on its own. Every video moment you return must be tied to the lesson that uses that video, so also select the lesson's title and slug alongside the moment.",
+    "",
     "## How to rank",
-    "- Rank by specificity. A title or summary containing the exact concept beats a broad keyword hit in a notes body.",
-    "- Prefer lessons whose title matches the concept over lessons that merely mention it in passing.",
+    "- Rank by specificity. A title, summary or chapter label containing the exact concept beats a broad keyword hit in a notes body or a transcript.",
+    "- Prefer a lesson or a chapter that matches the concept over one that merely mentions it in passing.",
+    "- A chapter match outranks a transcript match for the same video, because the label is the author or provider's own description of that moment.",
     "- Order the array best match first.",
     "",
     "## What you return",
-    "- Return only the lessonId and a relevance score for each result.",
-    "- Copy each lessonId verbatim from a groq_query result. Never invent, guess, reconstruct or truncate an id.",
-    "- Never write a title, summary, duration, course name, module number, lesson number or result count. The app resolves all of that from Sanity itself.",
+    "- Return only the kind, the id, a relevance score, and for a video the matched second.",
+    '- For a lesson: kind "lesson" and its lessonId. For a moment: kind "video", its videoId, and startSeconds.',
+    "- Copy every id and every startSeconds verbatim from a groq_query result. Never invent, guess, reconstruct, round or estimate an id or a timestamp.",
+    "- Never write a title, summary, duration, course name, module number, lesson number, thumbnail or result count. The app resolves all of that from Sanity itself.",
     "- Return an empty array when nothing in the library matches. An empty result is correct; a fabricated one is not.",
     "",
     "## When nothing fits",
@@ -205,7 +240,12 @@ type HydratedLesson = {
   slug: string | null;
   summary: string | null;
   duration: number | null;
+  videoUrl: string | null;
   keyPoints: string[] | null;
+  poster: {
+    alt: string | null;
+    asset: { url: string | null } | null;
+  } | null;
   course: {
     _id: string;
     title: string | null;
@@ -217,6 +257,123 @@ type HydratedLesson = {
     }> | null;
   } | null;
 };
+
+/** A video document as `SEARCH_VIDEO_QUERY` projects it. */
+type HydratedVideo = {
+  _id: string;
+  url: string | null;
+  chapters: Array<{
+    startSeconds: number | null;
+    label: string | null;
+  }> | null;
+  /** Transcript boundaries only. The chunk text is never projected. */
+  chunkStarts: number[] | null;
+};
+
+/**
+ * A reported second that has been confirmed against real video data.
+ *
+ * `source` records which stage resolved it. It is used for logging and for
+ * precedence, never rendered: the reference's video card has nowhere to show it.
+ */
+type ResolvedMoment = {
+  startSeconds: number;
+  source: "chapter" | "transcript";
+  label: string | null;
+};
+
+/**
+ * The nearest boundary to `requested`, or null when nothing is close enough.
+ *
+ * Exact equality wins over proximity, so a verbatim `startSeconds` copied out of a
+ * query result always resolves to itself and never to a neighbouring entry.
+ */
+function nearestBoundary(
+  requested: number,
+  boundaries: number[],
+): number | null {
+  let best: number | null = null;
+  let bestDistance = Number.POSITIVE_INFINITY;
+
+  for (const boundary of boundaries) {
+    const distance = Math.abs(boundary - requested);
+    if (distance === 0) return boundary;
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      best = boundary;
+    }
+  }
+
+  return bestDistance <= SNAP_TOLERANCE_SECONDS ? best : null;
+}
+
+/**
+ * Confirms the second the agent reported against the video document.
+ *
+ * This is where two-stage timestamp resolution actually happens. Chapters are checked
+ * first because their labels are clean and they are the moment a human would name.
+ * The transcript is the noisier backstop and is only consulted when no chapter is
+ * close enough, which is the common case: 57 of the 120 seeded videos have chapters
+ * at all, so the other 63 are reachable only through the transcript.
+ *
+ * Returning null is the grounding guarantee for timestamps. A second that matches
+ * neither a chapter nor a chunk boundary does not exist in that video, so the moment
+ * is dropped rather than rendered.
+ *
+ * Pure, so it can be exercised directly without a server or a dataset.
+ */
+export function resolveVideoMoment(
+  video: HydratedVideo,
+  requestedSeconds: number,
+): ResolvedMoment | null {
+  if (!Number.isFinite(requestedSeconds) || requestedSeconds < 0) return null;
+
+  const requested = Math.floor(requestedSeconds);
+
+  const chapters = (video.chapters ?? [])
+    .map((chapter) => ({
+      startSeconds:
+        typeof chapter?.startSeconds === "number" ? Math.floor(chapter.startSeconds) : null,
+      label: typeof chapter?.label === "string" ? chapter.label : null,
+    }))
+    .filter(
+      (chapter): chapter is { startSeconds: number; label: string | null } =>
+        chapter.startSeconds !== null,
+    );
+
+  for (const chapter of chapters) {
+    if (chapter.startSeconds === requested) {
+      return { startSeconds: chapter.startSeconds, source: "chapter", label: chapter.label };
+    }
+  }
+
+  const chapterStart = nearestBoundary(requested, chapters.map((chapter) => chapter.startSeconds));
+  if (chapterStart !== null) {
+    const chapter = chapters.find((entry) => entry.startSeconds === chapterStart);
+    return { startSeconds: chapterStart, source: "chapter", label: chapter?.label ?? null };
+  }
+
+  const chunkStarts = (video.chunkStarts ?? []).filter(
+    (start): start is number => typeof start === "number" && Number.isFinite(start),
+  );
+
+  for (const start of chunkStarts) {
+    if (Math.floor(start) === requested) {
+      return { startSeconds: requested, source: "transcript", label: null };
+    }
+  }
+
+  const chunkStart = nearestBoundary(
+    requested,
+    chunkStarts.map((start) => Math.floor(start)),
+  );
+
+  if (chunkStart !== null) {
+    return { startSeconds: chunkStart, source: "transcript", label: null };
+  }
+
+  return null;
+}
 
 /**
  * Walks `course.modules[]` to locate the module holding a lesson.
@@ -254,7 +411,28 @@ function locateLesson(
   return { moduleTitle: null, moduleNumber: null, lessonNumber: null };
 }
 
-function toCardData(lesson: HydratedLesson): SearchResultCardData | null {
+/**
+ * The lesson fields every card shape shares.
+ *
+ * A video card repeats the whole lesson identity because a moment is only ever
+ * rendered as a moment of a specific lesson, at a specific point in its course.
+ */
+type LessonCardFields = {
+  lessonId: string;
+  lessonSlug: string;
+  title: string;
+  summary: string;
+  duration: number | null;
+  createdAt: string;
+  courseTitle: string;
+  courseSlug: string;
+  categoryTitle: string | null;
+  moduleTitle: string | null;
+  moduleNumber: number | null;
+  lessonNumber: number | null;
+};
+
+function toLessonFields(lesson: HydratedLesson): LessonCardFields | null {
   // A card without a slug cannot link anywhere, so it is not a usable result.
   if (!lesson.slug) return null;
 
@@ -270,9 +448,6 @@ function toCardData(lesson: HydratedLesson): SearchResultCardData | null {
     summary: lesson.summary ?? "",
     duration: typeof lesson.duration === "number" ? lesson.duration : null,
     createdAt: lesson._createdAt ?? "",
-    keyPoints: Array.isArray(lesson.keyPoints)
-      ? lesson.keyPoints.filter((point): point is string => typeof point === "string")
-      : [],
     courseTitle: lesson.course?.title ?? "",
     courseSlug: lesson.course?.slug ?? "",
     categoryTitle: lesson.course?.category?.title ?? null,
@@ -282,49 +457,261 @@ function toCardData(lesson: HydratedLesson): SearchResultCardData | null {
   };
 }
 
+function toLessonResult(lesson: HydratedLesson): SearchLessonResult | null {
+  const fields = toLessonFields(lesson);
+  if (!fields) return null;
+
+  return {
+    kind: "lesson",
+    ...fields,
+    keyPoints: Array.isArray(lesson.keyPoints)
+      ? lesson.keyPoints.filter((point): point is string => typeof point === "string")
+      : [],
+  };
+}
+
+function toVideoResult(
+  videoId: string,
+  lesson: HydratedLesson,
+  moment: ResolvedMoment,
+): SearchVideoResult | null {
+  const fields = toLessonFields(lesson);
+  if (!fields) return null;
+
+  return {
+    kind: "video",
+    videoId,
+    ...fields,
+    posterUrl: lesson.poster?.asset?.url ?? null,
+    posterAlt: lesson.poster?.alt ?? null,
+    startSeconds: moment.startSeconds,
+  };
+}
+
+/** One moment candidate, before per-video precedence picks a winner. */
+type MomentCandidate = {
+  videoId: string;
+  moment: ResolvedMoment;
+  relevance: number;
+  /** Position in the agent's array, so ties fall back to its ordering. */
+  order: number;
+};
+
 /**
- * Turns the agent's ordered id list into renderable cards.
+ * Picks at most one moment per video.
  *
- * Ids that do not resolve are dropped rather than rendered, which is what makes the
- * results page grounded in real data. The count line is computed from what survives,
- * never taken from the model. Order is the model's, capped at `maxResults`.
+ * Chapter precedence is enforced here rather than trusted to the prompt. When the
+ * agent reports several hits for one video, a chapter-derived hit beats a
+ * transcript-derived one no matter how the two were scored, because the chapter label
+ * is the clean description of that moment and the transcript is the noisy backstop.
+ * Ties break on relevance, then on the agent's own ordering.
+ */
+function pickMomentsPerVideo(candidates: MomentCandidate[]): Map<string, MomentCandidate> {
+  const best = new Map<string, MomentCandidate>();
+
+  for (const candidate of candidates) {
+    const current = best.get(candidate.videoId);
+    if (!current) {
+      best.set(candidate.videoId, candidate);
+      continue;
+    }
+
+    const candidateIsChapter = candidate.moment.source === "chapter";
+    const currentIsChapter = current.moment.source === "chapter";
+
+    const wins =
+      (candidateIsChapter && !currentIsChapter) ||
+      (candidateIsChapter === currentIsChapter &&
+        (candidate.relevance > current.relevance ||
+          (candidate.relevance === current.relevance && candidate.order < current.order)));
+
+    if (wins) best.set(candidate.videoId, candidate);
+  }
+
+  return best;
+}
+
+/**
+ * Turns the agent's ordered selections into renderable cards.
+ *
+ * Selections that do not resolve are dropped rather than rendered, which is what makes
+ * the results page grounded in real data: an invented lesson or video id resolves to
+ * nothing, and an invented second resolves to no chapter or chunk boundary. The count
+ * line is computed from what survives, never taken from the model. Order is the
+ * model's, capped at `maxResults`.
  */
 export async function hydrateSearchResults(
-  ids: string[],
+  selections: SearchSelection[],
   query: string,
   maxResults: number,
 ): Promise<SearchResultsPayload> {
-  const uniqueIds = Array.from(new Set(ids.filter(Boolean))).slice(0, maxResults);
+  const lessonIds: string[] = [];
+  const videoIds: string[] = [];
+  const requestedSeconds = new Map<string, number[]>();
 
-  if (uniqueIds.length === 0) {
+  for (const selection of selections) {
+    if (selection.kind === "lesson") {
+      if (!lessonIds.includes(selection.lessonId)) lessonIds.push(selection.lessonId);
+      continue;
+    }
+
+    if (!videoIds.includes(selection.videoId)) videoIds.push(selection.videoId);
+
+    const existing = requestedSeconds.get(selection.videoId);
+    if (existing) {
+      if (!existing.includes(selection.startSeconds)) existing.push(selection.startSeconds);
+    } else {
+      requestedSeconds.set(selection.videoId, [selection.startSeconds]);
+    }
+  }
+
+  if (lessonIds.length === 0 && videoIds.length === 0) {
     return { query, results: [], totalCourses: 0 };
   }
 
-  const lessons = await client.fetch<HydratedLesson[] | null>(
-    SEARCH_HYDRATE_QUERY,
-    { ids: uniqueIds },
-    { perspective: "published" },
-  );
+  const relevanceByVideoId = new Map<string, number>();
 
-  const byId = new Map<string, HydratedLesson>();
+  selections.forEach((selection, index) => {
+    if (selection.kind !== "video") return;
+    if (relevanceByVideoId.has(selection.videoId)) return;
+
+    relevanceByVideoId.set(selection.videoId, selection.relevance ?? 100 - index);
+  });
+
+  const lessonsPromise =
+    lessonIds.length > 0
+      ? client.fetch<HydratedLesson[] | null>(
+          SEARCH_HYDRATE_QUERY,
+          { ids: lessonIds.slice(0, maxResults) },
+          { perspective: "published" },
+        )
+      : Promise.resolve<HydratedLesson[] | null>(null);
+
+  const videosPromise =
+    videoIds.length > 0
+      ? client.fetch<HydratedVideo[] | null>(
+          SEARCH_VIDEO_QUERY,
+          { ids: videoIds.slice(0, maxResults) },
+          { perspective: "published" },
+        )
+      : Promise.resolve<HydratedVideo[] | null>(null);
+
+  const [lessons, videos] = await Promise.all([lessonsPromise, videosPromise]);
+
+  const lessonById = new Map<string, HydratedLesson>();
   for (const lesson of lessons ?? []) {
-    if (lesson?._id) byId.set(lesson._id, lesson);
+    if (lesson?._id) lessonById.set(lesson._id, lesson);
+  }
+
+  const videoList = (videos ?? []).filter((video): video is HydratedVideo => !!video?._id);
+
+  // The reverse half of the join: a video result is always tied to the lesson that
+  // uses that video, so the lessons are fetched by the videos' stored URLs.
+  const videoUrls = videoList
+    .map((video) => video.url)
+    .filter((url): url is string => typeof url === "string" && url.length > 0);
+
+  const videoLessons =
+    videoUrls.length > 0
+      ? await client.fetch<HydratedLesson[] | null>(
+          SEARCH_VIDEO_LESSONS_QUERY,
+          { urls: videoUrls },
+          { perspective: "published" },
+        )
+      : null;
+
+  const lessonByUrl = new Map<string, HydratedLesson>();
+  const lessonByDerivedVideoId = new Map<string, HydratedLesson>();
+
+  for (const lesson of videoLessons ?? []) {
+    if (!lesson?._id) continue;
+    if (lesson.videoUrl) lessonByUrl.set(lesson.videoUrl, lesson);
+    const derived = toVideoDocumentId(lesson.videoUrl);
+    if (derived) lessonByDerivedVideoId.set(derived, lesson);
+  }
+
+  const candidates: MomentCandidate[] = [];
+  let droppedMoments = 0;
+
+  for (const video of videoList) {
+    const seconds = requestedSeconds.get(video._id);
+    if (!seconds || seconds.length === 0) continue;
+
+    const lesson = lessonByUrl.get(video.url ?? "") ?? lessonByDerivedVideoId.get(video._id);
+    if (!lesson) continue;
+
+    for (const second of seconds) {
+      const moment = resolveVideoMoment(video, second);
+      if (!moment) {
+        droppedMoments += 1;
+        continue;
+      }
+
+      candidates.push({
+        videoId: video._id,
+        moment,
+        relevance: relevanceByVideoId.get(video._id) ?? 0,
+        order: videoIds.indexOf(video._id),
+      });
+    }
+  }
+
+  const winners = pickMomentsPerVideo(candidates);
+
+  if (candidates.length > 0 || droppedMoments > 0) {
+    const chapterCount = [...winners.values()].filter(
+      (candidate) => candidate.moment.source === "chapter",
+    ).length;
+    console.log(
+      `[search] resolved ${winners.size} moments (${chapterCount} chapter, ${winners.size - chapterCount} transcript), dropped ${droppedMoments}`,
+    );
+  }
+
+  const videoResults = new Map<string, SearchVideoResult>();
+  for (const [videoId, candidate] of winners) {
+    const video = videoList.find((entry) => entry._id === videoId);
+    const lesson = video ? lessonByUrl.get(video.url ?? "") ?? lessonByDerivedVideoId.get(videoId) : null;
+    if (!video || !lesson) continue;
+
+    const card = toVideoResult(videoId, lesson, candidate.moment);
+    if (card) videoResults.set(videoId, card);
   }
 
   const results: SearchResultCardData[] = [];
-  for (const id of uniqueIds) {
-    const lesson = byId.get(id);
-    if (!lesson) continue;
+  const seenLessonIds = new Set<string>();
 
-    const card = toCardData(lesson);
-    if (card) results.push(card);
+  for (const selection of selections) {
+    if (results.length >= maxResults) break;
+
+    if (selection.kind === "lesson") {
+      if (seenLessonIds.has(selection.lessonId)) continue;
+
+      const lesson = lessonById.get(selection.lessonId);
+      if (!lesson) continue;
+
+      const card = toLessonResult(lesson);
+      if (!card) continue;
+
+      seenLessonIds.add(selection.lessonId);
+      results.push(card);
+      continue;
+    }
+
+    // One card per video, placed at the video's first appearance.
+    if (seenLessonIds.has(selection.videoId)) continue;
+
+    const card = videoResults.get(selection.videoId);
+    if (!card) continue;
+
+    seenLessonIds.add(selection.videoId);
+    results.push(card);
   }
 
-  const courseIds = new Set(
+  const courseSlugs = new Set(
     results.map((result) => result.courseSlug).filter(Boolean),
   );
 
-  return { query, results, totalCourses: courseIds.size };
+  return { query, results, totalCourses: courseSlugs.size };
 }
 
-export type { AgentContext, HydratedLesson };
+export type { AgentContext, HydratedLesson, HydratedVideo, ResolvedMoment };

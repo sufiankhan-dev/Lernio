@@ -38,14 +38,9 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
                 "Search your learning"
               )}
             </h1>
-            {query ? (
-              <p className="mt-3 text-body-large text-neutral-600">
-                Finding the lessons that answer your question.
-              </p>
-            ) : null}
           </div>
 
-          <div className="mt-8">
+          <div className="mt-4">
             <SearchPanel initialQuery={query} />
           </div>
         </div>

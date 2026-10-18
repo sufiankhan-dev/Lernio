@@ -696,7 +696,7 @@ export type AGENT_CONTEXT_QUERY_RESULT = {
 
 // Source: ../sanity/lib/queries.ts
 // Variable: SEARCH_HYDRATE_QUERY
-// Query: *[_type == "lesson" && _id in $ids]{    _id,    _createdAt,    title,    "slug": slug.current,    summary,    duration,    keyPoints,    "course": *[_type == "course" && references(^._id)][0]{      _id,      title,      "slug": slug.current,      "category": category->{_id, title, "slug": slug.current},      modules[]{        _key,        title,        "lessons": lessons[]->{_id}      }    }  }
+// Query: *[_type == "lesson" && _id in $ids]{    _id,    _createdAt,    title,    "slug": slug.current,    summary,    duration,    videoUrl,    keyPoints,    poster{      ...,      alt,      asset->{_id, url, metadata{dimensions, lqip}}    },    "course": *[_type == "course" && references(^._id)][0]{      _id,      title,      "slug": slug.current,      "category": category->{_id, title, "slug": slug.current},      modules[]{        _key,        title,        "lessons": lessons[]->{_id}      }    }  }
 export type SEARCH_HYDRATE_QUERY_RESULT = Array<{
   _id: string;
   _createdAt: string;
@@ -704,7 +704,82 @@ export type SEARCH_HYDRATE_QUERY_RESULT = Array<{
   slug: string | null;
   summary: string | null;
   duration: number | null;
+  videoUrl: string | null;
   keyPoints: Array<string> | null;
+  poster: {
+    asset: {
+      _id: string;
+      url: string | null;
+      metadata: {
+        dimensions: SanityImageDimensions | null;
+        lqip: string | null;
+      } | null;
+    } | null;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt: string | null;
+    _type: "image";
+  } | null;
+  course: {
+    _id: string;
+    title: string | null;
+    slug: string | null;
+    category: {
+      _id: string;
+      title: string | null;
+      slug: string | null;
+    } | null;
+    modules: Array<{
+      _key: string;
+      title: string | null;
+      lessons: Array<{
+        _id: string;
+      }> | null;
+    }> | null;
+  } | null;
+}>;
+
+// Source: ../sanity/lib/queries.ts
+// Variable: SEARCH_VIDEO_QUERY
+// Query: *[_type == "video" && _id in $ids]{    _id,    url,    chapters[]{      _key,      startSeconds,      label    },    "chunkStarts": chunks[].startSeconds  }
+export type SEARCH_VIDEO_QUERY_RESULT = Array<{
+  _id: string;
+  url: string | null;
+  chapters: Array<{
+    _key: string;
+    startSeconds: number | null;
+    label: string | null;
+  }> | null;
+  chunkStarts: Array<number | null> | null;
+}>;
+
+// Source: ../sanity/lib/queries.ts
+// Variable: SEARCH_VIDEO_LESSONS_QUERY
+// Query: *[_type == "lesson" && videoUrl in $urls]{    _id,    _createdAt,    title,    "slug": slug.current,    summary,    duration,    videoUrl,    poster{      ...,      alt,      asset->{_id, url, metadata{dimensions, lqip}}    },    "course": *[_type == "course" && references(^._id)][0]{      _id,      title,      "slug": slug.current,      "category": category->{_id, title, "slug": slug.current},      modules[]{        _key,        title,        "lessons": lessons[]->{_id}      }    }  }
+export type SEARCH_VIDEO_LESSONS_QUERY_RESULT = Array<{
+  _id: string;
+  _createdAt: string;
+  title: string | null;
+  slug: string | null;
+  summary: string | null;
+  duration: number | null;
+  videoUrl: string | null;
+  poster: {
+    asset: {
+      _id: string;
+      url: string | null;
+      metadata: {
+        dimensions: SanityImageDimensions | null;
+        lqip: string | null;
+      } | null;
+    } | null;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt: string | null;
+    _type: "image";
+  } | null;
   course: {
     _id: string;
     title: string | null;
@@ -735,6 +810,8 @@ declare module "@sanity/client" {
     '\n  *[_type == "instructor" && slug.current == $slug][0] {\n    _id,\n    _type,\n    name,\n    "slug": slug.current,\n    expertise,\n    bio,\n    photo {\n      ...,\n      asset->{_id, url, metadata{dimensions, lqip}}\n    },\n    "courses": *[_type == "course" && references(^._id)] | order(title asc) {\n      _id,\n      title,\n      "slug": slug.current,\n      summary,\n      level,\n      coverImage {\n        ...,\n        asset->{_id, url, metadata{dimensions, lqip}}\n      }\n    }\n  }\n': INSTRUCTOR_DETAIL_QUERY_RESULT;
     '\n  *[_type == "category" && defined(slug.current)] | order(title asc) {\n    _id,\n    title,\n    "slug": slug.current,\n    description\n  }\n': CATEGORIES_QUERY_RESULT;
     '\n  *[_type == "sanity.agentContext" && slug.current == $slug][0]{\n    _id,\n    name,\n    "slug": slug.current,\n    groqFilter,\n    instructions\n  }\n': AGENT_CONTEXT_QUERY_RESULT;
-    '\n  *[_type == "lesson" && _id in $ids]{\n    _id,\n    _createdAt,\n    title,\n    "slug": slug.current,\n    summary,\n    duration,\n    keyPoints,\n    "course": *[_type == "course" && references(^._id)][0]{\n      _id,\n      title,\n      "slug": slug.current,\n      "category": category->{_id, title, "slug": slug.current},\n      modules[]{\n        _key,\n        title,\n        "lessons": lessons[]->{_id}\n      }\n    }\n  }\n': SEARCH_HYDRATE_QUERY_RESULT;
+    '\n  *[_type == "lesson" && _id in $ids]{\n    _id,\n    _createdAt,\n    title,\n    "slug": slug.current,\n    summary,\n    duration,\n    videoUrl,\n    keyPoints,\n    poster{\n      ...,\n      alt,\n      asset->{_id, url, metadata{dimensions, lqip}}\n    },\n    "course": *[_type == "course" && references(^._id)][0]{\n      _id,\n      title,\n      "slug": slug.current,\n      "category": category->{_id, title, "slug": slug.current},\n      modules[]{\n        _key,\n        title,\n        "lessons": lessons[]->{_id}\n      }\n    }\n  }\n': SEARCH_HYDRATE_QUERY_RESULT;
+    '\n  *[_type == "video" && _id in $ids]{\n    _id,\n    url,\n    chapters[]{\n      _key,\n      startSeconds,\n      label\n    },\n    "chunkStarts": chunks[].startSeconds\n  }\n': SEARCH_VIDEO_QUERY_RESULT;
+    '\n  *[_type == "lesson" && videoUrl in $urls]{\n    _id,\n    _createdAt,\n    title,\n    "slug": slug.current,\n    summary,\n    duration,\n    videoUrl,\n    poster{\n      ...,\n      alt,\n      asset->{_id, url, metadata{dimensions, lqip}}\n    },\n    "course": *[_type == "course" && references(^._id)][0]{\n      _id,\n      title,\n      "slug": slug.current,\n      "category": category->{_id, title, "slug": slug.current},\n      modules[]{\n        _key,\n        title,\n        "lessons": lessons[]->{_id}\n      }\n    }\n  }\n': SEARCH_VIDEO_LESSONS_QUERY_RESULT;
   }
 }

@@ -10,7 +10,9 @@ import { LessonTabs } from "@/components/lesson/LessonTabs";
 import { VideoPlayer } from "@/components/lesson/VideoPlayer";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { Breadcrumbs } from "@/components/ui/Nav";
+import { Icon } from "@/components/ui/Icon";
 import { navLinks } from "@/lib/home-content";
+import { formatTimestamp } from "@/lib/format";
 import { normalizeStartSeconds } from "@/lib/video";
 import { getLessonBySlug } from "@/sanity/lib/data";
 
@@ -125,6 +127,16 @@ export default async function LessonPage(props: PageProps<"/lessons/[slug]">) {
           </div>
 
           <div className="mt-8">
+            {/* A search result links here with ?start=, so the player is already
+                partway through the video with nothing on screen saying why. This is
+                the same normalised value the embed was built from, so the label can
+                never disagree with where playback actually starts. */}
+            {startSeconds > 0 ? (
+              <p className="mb-3 inline-flex items-center gap-2 text-small text-neutral-600">
+                <Icon name="play-circle" size={14} className="shrink-0 text-primary-500" />
+                Playing from {formatTimestamp(startSeconds)}
+              </p>
+            ) : null}
             <VideoPlayer title={title} videoUrl={lesson.videoUrl} startSeconds={startSeconds} />
           </div>
 

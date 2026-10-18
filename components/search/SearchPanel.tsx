@@ -6,6 +6,7 @@ import { SearchField, SelectField } from "@/components/ui/Field";
 import { LinkButton } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { SearchResultCard } from "@/components/search/SearchResultCard";
+import { SearchVideoResultCard } from "@/components/search/SearchVideoResultCard";
 import {
   SEARCH_SORTS,
   SEARCH_SORT_LABELS,
@@ -88,6 +89,28 @@ function sortResults(results: SearchResultCardData[], sort: SearchSort) {
     );
   }
   return results;
+}
+
+/**
+ * The count line under the headline.
+ *
+ * Both numbers are computed after hydration dropped everything unresolvable, so they
+ * always describe what is actually on screen. Never taken from the model.
+ */
+function countLine(payload: SearchResultsPayload): string {
+  const count = payload.results.length;
+  const courses = payload.totalCourses;
+
+  return `Found ${count} ${count === 1 ? "result" : "results"} across ${courses} ${
+    courses === 1 ? "course" : "courses"
+  }`;
+}
+
+/** A lesson and a video can share an id space, so the key carries the kind too. */
+function resultKey(result: SearchResultCardData): string {
+  return result.kind === "video"
+    ? `video-${result.videoId}`
+    : `lesson-${result.lessonId}`;
 }
 
 export function SearchPanel({ initialQuery }: SearchPanelProps) {
@@ -201,7 +224,14 @@ export function SearchPanel({ initialQuery }: SearchPanelProps) {
 
   return (
     <>
-      <form role="search" onSubmit={onSubmit} className="mx-auto w-full max-w-[725px]" aria-label="Search your learning">
+      <p
+        aria-live="polite"
+        className="text-center text-body-large text-neutral-600"
+      >
+        {payload ? countLine(payload) : ""}
+      </p>
+
+      <form role="search" onSubmit={onSubmit} className="mx-auto mt-4 w-full max-w-[725px]" aria-label="Search your learning">
         <label htmlFor="search-page-input" className="sr-only">
           Search your learning
         </label>
@@ -260,8 +290,12 @@ export function SearchPanel({ initialQuery }: SearchPanelProps) {
         {!error && results.length > 0 ? (
           <ul className="flex flex-col gap-4">
             {results.map((result) => (
-              <li key={result.lessonId}>
-                <SearchResultCard result={result} />
+              <li key={resultKey(result)}>
+                {result.kind === "video" ? (
+                  <SearchVideoResultCard result={result} />
+                ) : (
+                  <SearchResultCard result={result} />
+                )}
               </li>
             ))}
           </ul>
@@ -271,7 +305,7 @@ export function SearchPanel({ initialQuery }: SearchPanelProps) {
           <div className="rounded-lg border border-neutral-200 bg-white p-10 text-center shadow-sm">
             <Icon name="search" size={28} className="mx-auto text-neutral-400" />
             <p className="mt-4 text-body-large font-medium text-neutral-900">
-              No lessons match that yet
+              No results match that yet
             </p>
             <p className="mt-2 text-body text-neutral-500">
               Try different keywords, or browse the full catalog to find your next course.

@@ -8,10 +8,10 @@
  * `lesson.videoUrl` resolves to `null` so the page can show a placeholder
  * rather than an iframe pointing at an arbitrary third party.
  *
- * Only YouTube is implemented. AGENTS.md §9 says a provider counts as supported
- * once both ingestion and playback exist, and the ingestion pipeline has not
- * landed yet, so Vimeo and Bunny playback waits for it. Adding one is a single
- * branch here.
+ * Only YouTube is implemented. All 120 ingested videos are YouTube, and AGENTS.md §9
+ * says a provider counts as supported once both ingestion and playback exist for it.
+ * Vimeo and Bunny playback therefore waits for their ingestion to land. Adding one is
+ * a single branch here plus a matching branch in `toVideoDocumentId`.
  */
 
 /** A YouTube id is 11 characters of URL-safe base64. */
@@ -57,12 +57,24 @@ function youtubeId(url: URL): string | null {
 /**
  * Normalises an untrusted `start` value.
  *
- * `start` arrives from the query string, so it is parsed defensively: anything
- * that is not a finite integer, is negative, or sits beyond the lesson's own
- * runtime is discarded and the video opens at 0. Without the runtime cap a
- * hand-edited `?start=` could ask the provider to seek past the end of the
- * video.
+ * `start` arrives from the query string, so it is parsed defensively: anything that is
+ * not a finite integer, is negative, or sits beyond the lesson's own runtime is
+ * discarded and the video opens at 0. Discarding rather than clamping is deliberate. A
+ * hand-edited `?start=999999` must not be rounded down to the last second of the video,
+ * because the lesson page shows this value back to the learner as "Playing from", and a
+ * badge reading 17:00 on a sixteen minute lesson is a lie the page tells about itself.
+ *
+ * The runtime cap carries a grace margin because `lesson.duration` is authored in whole
+ * minutes and does not always match the real video. Measured across the 120 seeded
+ * lessons, ten videos run past their authored duration, with a largest overshoot of
+ * 14 seconds. Without the grace, a moment genuinely matched in that tail is silently
+ * rewound, which is exactly the class of bug timestamped deep links introduce. Sixty
+ * seconds covers the drift with room to spare.
  */
+
+/** Slack above the authored runtime, covering authored-versus-actual drift. */
+export const START_GRACE_SECONDS = 60;
+
 export function normalizeStartSeconds(
   value: string | string[] | undefined,
   durationMinutes: number | null | undefined,
@@ -73,9 +85,10 @@ export function normalizeStartSeconds(
   const seconds = Number(value);
   if (!Number.isFinite(seconds) || seconds <= 0) return 0;
 
-  const maxSeconds = Math.max(0, Math.round((durationMinutes ?? 0) * 60));
+  const maxSeconds = Math.max(0, Math.round((durationMinutes ?? 0) * 60)) + START_GRACE_SECONDS;
+  if (seconds > maxSeconds) return 0;
 
-  return Math.min(Math.floor(seconds), maxSeconds);
+  return Math.floor(seconds);
 }
 
 /**
@@ -113,4 +126,36 @@ export function getVideoEmbed(
   }
 
   return { provider: "youtube", src: embed.toString() };
+}
+
+/**
+ * Resolves a lesson's `videoUrl` to the `_id` of its video document.
+ *
+ * The offline ingestion pipeline keys every video document as `video.` plus a key
+ * built from the provider id and the native id, so a lesson's URL determines its
+ * video document deterministically. Deriving the id here rather than joining on the
+ * stored URL means an author pasting a `youtu.be` short link still resolves, which a
+ * string equality join would miss.
+ *
+ * Mirrors `studio/scripts/ingest/ids.ts`. That module is offline tooling and is not
+ * importable from the web app, so the few lines it needs are repeated deliberately.
+ * Returns null for a host or shape this app does not recognise, in which case the
+ * caller falls back to matching on the stored URL.
+ */
+export function toVideoDocumentId(url: string | null | undefined): string | null {
+  if (!url) return null;
+
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return null;
+  }
+
+  const id = youtubeId(parsed);
+  if (!id) return null;
+
+  // `toDocumentKey` only strips characters Sanity rejects in an _id, and a YouTube
+  // native id is already URL-safe base64, so nothing here needs escaping.
+  return `video.youtube-${id}`;
 }

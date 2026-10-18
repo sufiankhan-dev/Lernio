@@ -179,7 +179,80 @@ export const SEARCH_HYDRATE_QUERY = defineQuery(`
     "slug": slug.current,
     summary,
     duration,
+    videoUrl,
     keyPoints,
+    poster{
+      ...,
+      alt,
+      asset->{_id, url, metadata{dimensions, lqip}}
+    },
+    "course": *[_type == "course" && references(^._id)][0]{
+      _id,
+      title,
+      "slug": slug.current,
+      "category": category->{_id, title, "slug": slug.current},
+      modules[]{
+        _key,
+        title,
+        "lessons": lessons[]->{_id}
+      }
+    }
+  }
+`)
+
+/**
+ * Resolves the video documents whose moments the search agent selected, so the
+ * seconds it reported can be checked against real data.
+ *
+ * The agent contributes a video `_id` and the `startSeconds` it saw in a query
+ * result. Everything that decides whether that second is real happens here, so the
+ * projection is deliberately narrow:
+ *
+ * - `chapters[]{startSeconds, label}` is the full table of contents. It is small by
+ *   construction and carries the clean labels the two-stage rule prefers.
+ * - `chunkStarts` is the transcript reduced to its boundaries. The chunk *text* is
+ *   deliberately not projected. Confirming a second needs only the boundaries, and
+ *   AGENTS.md §12 warns that a transcript overflows a context window; keeping the text
+ *   out of this response honours that for our own code and not only for the agent.
+ *
+ * `url` comes back so the owning lesson can be found by the next query.
+ */
+export const SEARCH_VIDEO_QUERY = defineQuery(`
+  *[_type == "video" && _id in $ids]{
+    _id,
+    url,
+    chapters[]{
+      _key,
+      startSeconds,
+      label
+    },
+    "chunkStarts": chunks[].startSeconds
+  }
+`)
+
+/**
+ * The reverse half of the video join: the lessons that use one of these videos.
+ *
+ * A video document is an internal lookup and never a result on its own, so every
+ * moment has to end up tied to a lesson. Matching on `videoUrl` covers the seeded
+ * dataset, where a video's `url` and its lesson's `videoUrl` are the same canonical
+ * watch URL. When they are not, `toVideoDocumentId` derives the document id from the
+ * lesson's own URL instead, which is why `videoUrl` is projected above.
+ */
+export const SEARCH_VIDEO_LESSONS_QUERY = defineQuery(`
+  *[_type == "lesson" && videoUrl in $urls]{
+    _id,
+    _createdAt,
+    title,
+    "slug": slug.current,
+    summary,
+    duration,
+    videoUrl,
+    poster{
+      ...,
+      alt,
+      asset->{_id, url, metadata{dimensions, lqip}}
+    },
     "course": *[_type == "course" && references(^._id)][0]{
       _id,
       title,
