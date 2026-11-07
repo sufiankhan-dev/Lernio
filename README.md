@@ -4,10 +4,6 @@ Lernio is an AI-powered learning platform where learners search a course library
 
 Courses, lessons, instructors and categories are authored in Sanity. A Next.js app renders the catalog, course pages and lesson pages, keeps video playback on-site, and runs a grounded search agent over the content through the Sanity Context MCP.
 
-<p align="center">
-  <img src="design/lernio-home.png" alt="Lernio home page design reference" width="360" />
-</p>
-
 ## What it does
 
 - **Catalog and course pages** — browse every course, see level, duration, module count and the full curriculum, then open any lesson.
