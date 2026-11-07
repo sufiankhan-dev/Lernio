@@ -144,6 +144,7 @@ The Studio reads its own `studio/.env`:
 | --- | --- |
 | `SANITY_STUDIO_PROJECT_ID`, `SANITY_STUDIO_DATASET`, `SANITY_STUDIO_API_VERSION` | Studio project coordinates |
 | `SANITY_API_READ_TOKEN` | Used only by the offline ingestion pipeline |
+| `SANITY_STUDIO_BASEPATH` | Vercel only: `/studio`. Leave unset locally and for Sanity hosting |
 | `YOUTUBE_INNERTUBE_API_KEY` | Optional override for the pipeline's YouTube client key |
 
 ### 3. Set up Sanity
@@ -172,6 +173,21 @@ npm run studio:dev   # Studio at http://localhost:3333
 ```
 
 Search needs `OPENAI_API_KEY` and `SANITY_API_READ_TOKEN` in `.env.local`; without them the route returns a clear 503.
+
+## Deploy on Vercel
+
+The repo deploys as **one Vercel project with two services**, configured in `vercel.json`:
+
+| Service | Root | Framework | Public path |
+| --- | --- | --- | --- |
+| `app` | `.` | `nextjs` | `/` |
+| `studio` | `studio` | `sanity` | `/studio` |
+
+- Both services install independently (`studio/` has its own lockfile), and project env vars are shared.
+- Set `SANITY_STUDIO_BASEPATH=/studio` in the Vercel project so the Studio's assets and router resolve under `/studio`. Keep it out of local `.env` files: `sanity deploy` would otherwise build the Sanity-hosted Studio under `/studio`.
+- `/static/*` is also routed to the Studio because the built HTML hardcodes its favicons at `/static/...`.
+- There are no service bindings. The app never calls the Studio service; it calls Sanity's hosted API and its own `/api/search` route.
+- Deploying the Studio to Vercel does not replace `npm run studio:deploy`. The Context MCP only serves a dataset with a Studio deployed to Sanity hosting.
 
 ## Video ingestion
 
