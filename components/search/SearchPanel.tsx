@@ -263,7 +263,7 @@ export function SearchPanel({ initialQuery }: SearchPanelProps) {
           label="Sort by"
           value={sort}
           onChange={(event) => setSort(event.target.value as SearchSort)}
-          wrapperClassName="w-[190px]"
+          wrapperClassName="w-full sm:w-[190px]"
         >
           {SEARCH_SORTS.map((option) => (
             <option key={option} value={option}>

@@ -24,7 +24,7 @@ export default async function Home() {
       <SiteHeader links={navLinks} />
       <HomeHero />
       <section aria-labelledby="all-courses" className="px-6 pt-14 pb-8 sm:px-8 lg:px-14">
-        <div className="flex items-end justify-between gap-6">
+        <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
           <h2 id="all-courses" className="font-display text-heading-1 font-bold text-neutral-900">
             All Courses
           </h2>

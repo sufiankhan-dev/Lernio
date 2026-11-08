@@ -107,12 +107,12 @@ export function CourseContent({ moduleCount, totalMinutes, modules }: CourseCont
                     <li key={lesson.key} className="border-b border-neutral-200 last:border-b-0">
                       <Link
                         href={lesson.slug ? `/lessons/${lesson.slug}` : "#"}
-                        className="flex items-center gap-4 py-3 transition-colors hover:text-primary-500"
+                        className="flex flex-wrap items-center gap-x-4 gap-y-1 py-3 transition-colors hover:text-primary-500 sm:flex-nowrap"
                       >
                         <span className="shrink-0 text-small text-neutral-500">
                           Lesson {index + 1}.{lessonIndex + 1}
                         </span>
-                        <span className="min-w-0 flex-1 text-body font-medium text-neutral-900">
+                        <span className="min-w-0 flex-1 basis-full text-body font-medium text-neutral-900 sm:basis-auto">
                           {lesson.title}
                         </span>
                         {lesson.isFreePreview ? (
@@ -120,7 +120,7 @@ export function CourseContent({ moduleCount, totalMinutes, modules }: CourseCont
                             Free preview
                           </span>
                         ) : null}
-                        <span className="shrink-0 text-small whitespace-nowrap text-neutral-500">
+                        <span className="hidden shrink-0 text-small whitespace-nowrap text-neutral-500 sm:inline">
                           {formatDuration(lesson.minutes)}
                         </span>
                       </Link>

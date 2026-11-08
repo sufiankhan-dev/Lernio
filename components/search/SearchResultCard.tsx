@@ -99,7 +99,7 @@ export function SearchResultCard({ result }: SearchResultCardProps) {
           <p className="mt-2 line-clamp-2 text-body text-neutral-500">{summary}</p>
         ) : null}
 
-        <div className="mt-auto flex items-end justify-between gap-4 pt-4">
+        <div className="mt-auto flex flex-col items-start gap-3 pt-4 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
           <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1 text-small text-neutral-500">
             {moduleLabel ? (
               <span className="inline-flex items-center gap-1.5">

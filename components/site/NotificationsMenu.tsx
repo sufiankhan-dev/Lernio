@@ -100,7 +100,7 @@ export function NotificationsMenu() {
         <div
           id={PANEL_ID}
           aria-label="Notifications"
-          className="absolute right-0 top-full z-50 mt-2 w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-xl"
+          className="absolute right-0 top-full z-50 mt-2 w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-xl max-lg:fixed max-lg:inset-x-4 max-lg:top-[72px] max-lg:mt-0 max-lg:w-auto max-lg:max-w-none"
         >
           <div className="flex items-center justify-between gap-4 border-b border-neutral-200 px-5 py-4">
             <h2 className="font-display text-heading-3 font-semibold text-neutral-900">

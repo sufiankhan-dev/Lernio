@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Icon } from "./Icon";
+import { MobileNav } from "./MobileNav";
 
 /**
  * The Lernio mark: a white "L" knocked out of an emerald rounded square.
@@ -61,10 +62,10 @@ type SiteNavProps = {
 
 export function SiteNav({ links, actions, className = "" }: SiteNavProps) {
   return (
-    <div className={`flex items-center ${actions ? "w-full justify-between" : ""} ${className}`}>
-      <nav aria-label="Main" className="flex items-center gap-14">
+    <div className={`flex w-full items-center justify-between ${className}`}>
+      <nav aria-label="Main" className="flex min-w-0 items-center gap-6 lg:gap-14">
         <Logo />
-        <ul className="flex items-center gap-10">
+        <ul className="hidden items-center gap-10 lg:flex">
           {links.map((link) => (
             <li key={link.label}>
               <Link
@@ -82,7 +83,8 @@ export function SiteNav({ links, actions, className = "" }: SiteNavProps) {
           ))}
         </ul>
       </nav>
-      {actions ? <div className="flex items-center gap-4">{actions}</div> : null}
+      {actions ? <div className="hidden items-center gap-4 lg:flex">{actions}</div> : null}
+      <MobileNav links={links} actions={actions} brand={<Logo />} />
     </div>
   );
 }

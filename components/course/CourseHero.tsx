@@ -26,7 +26,7 @@ function CoverTile({
   coverImageAlt,
 }: Pick<CourseHeroProps, "title" | "coverImageUrl" | "coverImageAlt">) {
   const shell =
-    "relative aspect-[4/5] w-full overflow-hidden rounded-lg bg-neutral-900 shadow-sm";
+    "relative mx-auto aspect-[4/5] w-full max-w-[260px] overflow-hidden rounded-lg bg-neutral-900 shadow-sm sm:mx-0 sm:max-w-none";
 
   if (!coverImageUrl) {
     const initials = title

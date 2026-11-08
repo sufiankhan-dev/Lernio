@@ -95,16 +95,18 @@ export default async function LessonPage(props: PageProps<"/lessons/[slug]">) {
       <SiteHeader links={navLinks.map((link) => ({ ...link, active: link.href === "/courses" }))} />
 
       <div className="grid flex-1 gap-8 px-6 pt-8 pb-10 sm:px-8 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-12 lg:px-16">
-        <LessonSidebar
-          courseSlug={courseSlug}
-          courseTitle={courseTitle}
-          progressPercent={progressPercent}
-          moduleCount={modules.length}
-          currentModuleNumber={currentModuleNumber}
-          modules={modules}
-        />
+        <div className="order-2 min-w-0 lg:order-1">
+          <LessonSidebar
+            courseSlug={courseSlug}
+            courseTitle={courseTitle}
+            progressPercent={progressPercent}
+            moduleCount={modules.length}
+            currentModuleNumber={currentModuleNumber}
+            modules={modules}
+          />
+        </div>
 
-        <div className="min-w-0">
+        <div className="order-1 min-w-0 lg:order-2">
           <Breadcrumbs
             items={[
               { label: "All Courses", href: "/courses" },

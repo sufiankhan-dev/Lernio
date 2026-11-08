@@ -34,7 +34,9 @@ export type IconName =
   | "rocket"
   | "shield"
   | "zap"
-  | "users";
+  | "users"
+  | "menu"
+  | "close";
 
 export type IconVariant = "outline" | "filled";
 
@@ -223,6 +225,19 @@ const outlinePaths: Record<IconName, React.ReactNode> = {
       <path d="M18.1 14.3c2 .9 3.3 2.9 3.3 5.7" />
     </>
   ),
+  menu: (
+    <>
+      <path d="M4 7h16" />
+      <path d="M4 12h16" />
+      <path d="M4 17h16" />
+    </>
+  ),
+  close: (
+    <>
+      <path d="M6 6l12 12" />
+      <path d="M18 6L6 18" />
+    </>
+  ),
 };
 
 const filledPaths: Record<IconName, React.ReactNode> = {
@@ -379,6 +394,16 @@ const filledPaths: Record<IconName, React.ReactNode> = {
       <path d="M15.6 3.9a4 4 0 0 1 0 7.8l-1.6-1.5a2 2 0 0 0 0-4.8z" />
       <path d="M17.2 14c2.6 1 4.2 3.2 4.2 6.4v1H17.4v-1c0-2.4-.9-4.3-2.5-5.5z" />
     </>
+  ),
+  menu: (
+    <>
+      <rect x="3" y="6" width="18" height="2" rx="1" />
+      <rect x="3" y="11" width="18" height="2" rx="1" />
+      <rect x="3" y="16" width="18" height="2" rx="1" />
+    </>
+  ),
+  close: (
+    <path d="M6.4 4.3 4.3 6.4 9.9 12l-5.6 5.6 2.1 2.1L12 14.1l5.6 5.6 2.1-2.1L14.1 12l5.6-5.6-2.1-2.1L12 9.9z" />
   ),
 };
 
